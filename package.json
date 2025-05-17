@@ -1,12 +1,31 @@
 {
   "name": "vanjs-htm",
+  "author": "VoidedClouds",
+  "license": "MIT",
   "version": "0.5.0",
+  "description": "HTM with VanJS for JSX-like syntax in plain JavaScript using VanJS reactivity.",
   "source": "src/index.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "types": "./types/van-htm.d.ts",
+  "main": "./dist/van-htm.global.js",
+  "browser": "./dist/van-htm.global.js",
+  "module": "./dist/van-htm.mjs",
+  "exports": {
+    ".": {
+      "types": "./types/van-htm.d.ts",
+      "browser": "./dist/van-htm.global.js",
+      "import": "./dist/van-htm.mjs",
+      "require": "./dist/van-htm.cjs"
+    }
+  },
   "scripts": {
-    "build": "rimraf dist types && npm run build:js && npm run types",
+    "build": "rimraf dist types && npm run build:js && mv dist/node.js dist/van-htm.cjs && npm run types",
     "build:js": "tsup",
     "test": "vitest run tests",
-    "types": "tsc -p tsconfig.build.json"
+    "types": "tsc -p tsconfig.build.json && mv types/index.d.ts types/van-htm.d.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.12",
@@ -25,5 +44,12 @@
     "type": "git",
     "url": "https://github.com/VoidedClouds/van-htm"
   },
-  "license": "MIT"
+  "bugs": {
+    "url": "https://github.com/VoidedClouds/van-htm/issues"
+  },
+  "keywords": [
+    "HTM",
+    "VanJS",
+    "VanX"
+  ]
 }

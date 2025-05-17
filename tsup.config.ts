@@ -50,7 +50,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: 
     clean: true,
     // dts: true,
     entry: {
-      [node ? 'node' : dev ? 'dev' : 'prod']: 'src/index.ts'
+      [node ? 'node' : dev ? 'dev.van-htm' : 'van-htm']: 'src/index.ts'
     },
     external: ['alien-signals'],
     format: node ? 'cjs' : ['esm', 'iife'],

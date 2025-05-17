@@ -43,10 +43,10 @@ VanJS HTM provides several prebuilt bundles for browser usage, available via CDN
 
 Each directory contains:
 
-- `prod.mjs` (ESM, minified)
-- `prod.global.js` (IIFE/global, minified)
-- `dev.mjs` (ESM, unminified)
-- `dev.global.js` (IIFE/global, unminified)
+- `van-htm.mjs` (ESM, minified)
+- `van-htm.global.js` (IIFE/global, minified)
+- `dev.van-htm.mjs` (ESM, unminified)
+- `dev.van-htm.global.js` (IIFE/global, unminified)
 
 ## Additional Usage Information
 
@@ -82,10 +82,10 @@ const visible = van.state(true);
 const content = html`
   <div
     show:when=${visible}
-    show:fallback="${() =>
+    show:fallback=${() =>
       html`
         <b>Fallback - ${visible}</b>
-      `}"
+      `}
   >
     Visible - ${visible}
   </div>
@@ -103,27 +103,37 @@ Renders the element into a different part of the DOM (a "portal"). The `portal:m
 - A DOM `Node`
 - A CSS selector string (e.g., `#modal-root`)
 
+> **Note:** For `rmPortals` to work correctly, portals should only be nested as direct children (first child level) of their parent element. Nesting portals deeper will prevent `rmPortals` from removing them properly.
+
 ```js
 const portalTarget = document.getElementById('portal-target');
-const portaled = html`
-  <div portal:mount=${portalTarget}>Portaled Content</div>
+const containerWithPortal = html`
+  <div id="container">
+    <div>Some content before</div>
+    <div portal:mount=${portalTarget}>Content to Portal</div>
+    <div>Some content after</div>
+  </div>
 `;
-van.add(document.body, portaled);
+van.add(document.body, containerWithPortal);
 ```
 
 You can also use a selector:
 
 ```js
-const portaled = html`
-  <div portal:mount="#portal-target">Portaled Content</div>
+const containerWithPortal = html`
+  <div id="container">
+    <div>Some content before</div>
+    <div portal:mount="#portal-target">Content to Portal</div>
+    <div>Some content after</div>
+  </div>
 `;
 ```
 
 ### Removing Portaled Elements
 
 ```js
-// Removes all portaled elements created from `container` in `portalTarget` (or `document.body`).
-rmPortals(container, portalTarget?);
+// Removes all portaled elements created from `parentContainer` that are mounted in `portalTarget` (or `document.body`).
+rmPortals(parentContainer, portalTarget?);
 ```
 
 ## API
@@ -138,7 +148,7 @@ rmPortals(container, portalTarget?);
 Returns:
 
 - `html`: The htm template tag.
-- `rmPortals(parent, portalTarget?)`: Remove portaled elements created from `parent` in `portalTarget` (or `document.body`).
+- `rmPortals(parentContainer, portalTarget?)`: Remove portaled elements created from `parentContainer` in `portalTarget` (or `document.body`).
 
 ## License
 
