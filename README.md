@@ -1,4 +1,4 @@
-# VanJS HTM
+# Van HTM
 
 A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding.
 
@@ -32,7 +32,7 @@ van.add(document.body, el);
 
 ## Browser Builds
 
-VanJS HTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://cdn.jsdelivr.net/npm/vanjs-htm/dist/)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHtm options:
+Van HTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://cdn.jsdelivr.net/npm/vanjs-htm/dist/)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHtm options:
 
 **Build output structure:**
 
