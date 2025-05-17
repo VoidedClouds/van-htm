@@ -2,14 +2,14 @@ import type htm from 'htm';
 import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
 
 export type VanHtmOptions = {
-  htm: any;
+  htm: typeof htm | any;
   van: Van | any;
   vanX?: any;
   decode?: (input: string) => string;
 };
 
 export type VanHtm = {
-  html: ReturnType<(typeof htm)['bind']>;
+  html: (template: TemplateStringsArray, ...substitutions: any[]) => ChildDom;
   rmPortals?: (parent: Node, portalTarget?: Element) => void;
 };
 

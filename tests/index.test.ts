@@ -1,3 +1,4 @@
+import { ChildDom } from 'vanjs-core';
 import {
   // vitest
   afterEach,
@@ -33,7 +34,7 @@ describe('html', function () {
       const el = html`
         <div>Hello</div>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       expect(container.innerHTML).toContain('Hello');
     });
 
@@ -41,7 +42,7 @@ describe('html', function () {
       const el = html`
         <div><span>World</span></div>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       expect(container.querySelector('span')!.textContent).toBe('World');
     });
 
@@ -49,7 +50,7 @@ describe('html', function () {
       const el = html`
         <button id="btn" class="primary">Click</button>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       const btn = container.querySelector('#btn');
       expect(btn).not.toBeNull();
       expect(btn?.className).toBe('primary');
@@ -63,7 +64,7 @@ describe('html', function () {
           <li>Two</li>
         </ul>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       const items = container.querySelectorAll('li');
       expect(items.length).toBe(2);
       expect(items[0].textContent).toBe('One');
@@ -75,7 +76,7 @@ describe('html', function () {
       const el = html`
         <span>${value}</span>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       expect(container.textContent).toBe('Dynamic!');
     });
 
@@ -83,7 +84,7 @@ describe('html', function () {
       const el = html`
         <div>${null}${undefined}${0}</div>
       `;
-      container.appendChild(el);
+      container.appendChild(el as Node);
       expect(container.textContent).toBe('0');
     });
   });
@@ -94,7 +95,7 @@ describe('html', function () {
       const el = html`
         <div>&amp; &lt; &gt; &quot; &apos; &nbsp;</div>
       `;
-      container.appendChild(el);
+      container.append(el as Node);
       expect(container.textContent).toBe(`& < > " ' \u00A0`);
     });
 
@@ -103,7 +104,7 @@ describe('html', function () {
       const el = html`
         <div>&amp; &lt; &gt; &quot; &apos; &nbsp;</div>
       `;
-      container.appendChild(el);
+      container.append(el as Node);
       expect(container.textContent).toBe('&amp; &lt; &gt; &quot; &apos; &nbsp;');
     });
   });
@@ -123,7 +124,7 @@ describe('html', function () {
                 `}
             </ul>
           `;
-          container.appendChild(el);
+          container.appendChild(el as Node);
           const lis = container.querySelectorAll('li');
           expect(lis.length).toBe(3);
           expect(lis[0].textContent).toBe('1');
@@ -143,7 +144,7 @@ describe('html', function () {
                 `}
             </ul>
           `;
-          container.appendChild(el);
+          container.appendChild(el as Node);
           expect(container.querySelectorAll('li').length).toBe(0);
         });
 
@@ -159,7 +160,7 @@ describe('html', function () {
                 `}
             </ul>
           `;
-          container.appendChild(el);
+          container.appendChild(el as Node);
           const lis = container.querySelectorAll('li');
           expect(lis.length).toBe(2);
           expect(lis[0].textContent).toBe('A');
@@ -280,7 +281,7 @@ describe('html', function () {
           const el = html`
             <div show:when=${true}>Visible</div>
           `;
-          container.append(el());
+          container.append((el as Function)());
           expect(container.textContent).toBe('Visible');
         });
 
@@ -290,7 +291,7 @@ describe('html', function () {
           const el = html`
             <div show:when=${false} show:fallback=${() => 'Hidden'}>Visible</div>
           `;
-          container.append(el());
+          container.append((el as Function)());
           expect(container.textContent).toBe('Hidden');
         });
 
@@ -300,7 +301,7 @@ describe('html', function () {
           const el = html`
             <div show:when=${false}>Visible</div>
           `;
-          container.append(el());
+          container.append((el as Function)());
           expect(container.textContent).toBe('');
         });
       });
@@ -392,7 +393,7 @@ describe('html', function () {
           <div portal:mount="#portal-target">Portaled</div>
         `;
         // The returned node is a comment, not the actual element
-        container.appendChild(el);
+        container.appendChild(el as Node);
         expect(portalTarget.textContent).toBe('Portaled');
       });
 
@@ -402,7 +403,7 @@ describe('html', function () {
         const el = html`
           <div portal:mount=${portalTarget}>PortaledRef</div>
         `;
-        container.appendChild(el);
+        container.appendChild(el as Node);
         expect(portalTarget.textContent).toBe('PortaledRef');
       });
 
@@ -414,7 +415,7 @@ describe('html', function () {
           const el = html`
             <div portal:mount=${null}>ShouldNotAppear</div>
           `;
-          container.appendChild(el);
+          container.appendChild(el as Node);
         }).toThrow(TypeError);
       });
 
@@ -425,12 +426,12 @@ describe('html', function () {
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
         `;
-        container.appendChild(el);
+        container.appendChild(el as Node);
 
         // Confirm it's present
         expect(portalTarget.textContent).toBe('Portaled');
         // Remove portaled elements
-        rmPortals(container, portalTarget);
+        rmPortals!(container, portalTarget);
         // Should be gone
         expect(portalTarget.textContent).toBe('');
       });
@@ -444,13 +445,13 @@ describe('html', function () {
         const el2 = html`
           <div portal:mount="#portal-target">Two</div>
         `;
-        container.appendChild(el1);
-        container.appendChild(el2);
+        container.appendChild(el1 as Node);
+        container.appendChild(el2 as Node);
 
         expect(portalTarget.textContent).toContain('One');
         expect(portalTarget.textContent).toContain('Two');
 
-        rmPortals(container, portalTarget);
+        rmPortals!(container, portalTarget);
 
         expect(portalTarget.textContent).toBe('');
       });
@@ -465,14 +466,14 @@ describe('html', function () {
         const el2 = html`
           <div portal:mount="#portal-target">FromOtherContainer</div>
         `;
-        container.appendChild(el1);
-        otherContainer.appendChild(el2);
+        container.appendChild(el1 as Node);
+        otherContainer.appendChild(el2 as Node);
 
         expect(portalTarget.textContent).toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
 
         // Remove only those belonging to `container`
-        rmPortals(container, portalTarget);
+        rmPortals!(container, portalTarget);
 
         expect(portalTarget.textContent).not.toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
@@ -482,7 +483,7 @@ describe('html', function () {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
         // No portaled elements
-        expect(() => rmPortals(container, portalTarget)).not.toThrow();
+        expect(() => rmPortals!(container, portalTarget)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
 
@@ -492,10 +493,10 @@ describe('html', function () {
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
         `;
-        container.appendChild(el);
+        container.appendChild(el as Node);
 
         expect(portalTarget.textContent).toBe('Portaled');
-        rmPortals(container); // No portalTarget provided
+        rmPortals!(container); // No portalTarget provided
         expect(portalTarget.textContent).toBe('');
       });
 
@@ -508,13 +509,13 @@ describe('html', function () {
         const el2 = html`
           <div portal:mount="#portal-target">Two</div>
         `;
-        container.appendChild(el1);
-        container.appendChild(el2);
+        container.appendChild(el1 as Node);
+        container.appendChild(el2 as Node);
 
         expect(portalTarget.textContent).toContain('One');
         expect(portalTarget.textContent).toContain('Two');
 
-        rmPortals(container); // No portalTarget provided
+        rmPortals!(container); // No portalTarget provided
 
         expect(portalTarget.textContent).toBe('');
       });
@@ -529,14 +530,14 @@ describe('html', function () {
         const el2 = html`
           <div portal:mount="#portal-target">FromOtherContainer</div>
         `;
-        container.appendChild(el1);
-        otherContainer.appendChild(el2);
+        container.appendChild(el1 as Node);
+        otherContainer.appendChild(el2 as Node);
 
         expect(portalTarget.textContent).toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
 
         // Remove only those belonging to `container` (uses document.body)
-        rmPortals(container);
+        rmPortals!(container);
 
         expect(portalTarget.textContent).not.toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
@@ -545,7 +546,7 @@ describe('html', function () {
       it('does not throw if there are no portaled elements and no portalTarget is given', () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
-        expect(() => rmPortals(container)).not.toThrow();
+        expect(() => rmPortals!(container)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
     });
