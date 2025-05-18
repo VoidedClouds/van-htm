@@ -1,6 +1,6 @@
 # Van HTM
 
-A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding. [Here's a sample](https://jsfiddle.net/VoidedClouds/4oxq78ag/) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
+A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding. [Here's a sample](https://codepen.io/VoidedClouds/pen/myygzNQ) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
 
 ## Features
 
@@ -10,19 +10,21 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 
 ## Usage
 
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/GggLYmx)
+
 ```js
-// These imports could also be globally available
+// <script src='https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.5.nomodule.min.js'></script>
+// <script src='https://cdn.jsdelivr.net/npm/vanjs-ext@0.6.2/dist/van-x.nomodule.min.js'></script>
+// The imports below could also be globally available
 import htm from 'htm';
 import { decode } from 'html-entities';
-import van from 'vanjs-core';
-import * as vanX from 'vanjs-ext';
 import vanHtm from 'vanjs-htm';
 
 const { html, rmPortals } = vanHtm({ htm, van, vanX, decode });
 
 const el = html`
   <div>
-    Hello,
+    Hello,&nbsp;
     <b>world</b>
     !
   </div>
@@ -58,17 +60,21 @@ Each directory contains:
 
 Renders a list by looping over a reactive array or iterable. The value of `for:each` should be a reactive list (e.g., from `vanX.reactive`). The child function receives the current value, a deleter function, and the index/key.
 
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/raabqja)
+
 ```js
 const items = vanX.reactive([1, 2, 3]);
-const list = html`
-  <ul for:each=${items}>
-    ${(v, deleter, k) =>
-      html`
-        <li>${v}</li>
-      `}
-  </ul>
-`;
-van.add(document.body, list);
+van.add(
+  document.body,
+  html`
+    <ul for:each=${items}>
+      ${(v, deleter, k) =>
+        html`
+          <li>${v}</li>
+        `}
+    </ul>
+  `
+);
 ```
 
 See [VanX docs: Reactive List](https://vanjs.org/x#reactive-list) for more details on the `itemFunction` signature.
@@ -77,20 +83,30 @@ See [VanX docs: Reactive List](https://vanjs.org/x#reactive-list) for more detai
 
 Conditionally renders content based on a boolean, a VanJS state, or a function. If the condition is falsy, the `show:fallback` value is rendered instead (can be a primitive, a state or a function if you need reactivity).
 
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/emmoPyp)
+
 ```js
 const visible = van.state(true);
-const content = html`
-  <div
-    show:when=${visible}
-    show:fallback=${() =>
-      html`
-        <b>Fallback - ${visible}</b>
-      `}
-  >
-    Visible - ${visible}
-  </div>
+const toggleButton = html`
+  <button onclick=${() => (visible.val = !visible.val)}>Toggle Visible</button>
 `;
-van.add(document.body, content);
+van.add(
+  document.body,
+  html`
+    <div>
+      ${toggleButton}
+      <div
+        show:when=${visible}
+        show:fallback=${() =>
+          html`
+            <div><b>Fallback - ${visible}</b></div>
+          `}
+      >
+        Visible - ${visible}
+      </div>
+    </div>
+  `
+);
 ```
 
 - `show:when`: Accepts a boolean, a VanJS state, or a function returning a boolean.
@@ -105,13 +121,16 @@ Renders the element into a different part of the DOM (a "portal"). The `portal:m
 
 > **Note:** For `rmPortals` to work correctly, portals should only be nested as direct children (first child level) of their parent element. Nesting portals deeper will prevent `rmPortals` from removing them properly.
 
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/GggLYdB)
+
 ```js
 const portalTarget = document.getElementById('portal-target');
 const containerWithPortal = html`
-  <div id="container">
+  <div>
     <div>Some content before</div>
     <div portal:mount=${portalTarget}>Content to Portal</div>
     <div>Some content after</div>
+    <button onclick=${() => rmPortals(containerWithPortal, portalTarget)}>Remove Portal</button>
   </div>
 `;
 van.add(document.body, containerWithPortal);
@@ -119,14 +138,19 @@ van.add(document.body, containerWithPortal);
 
 You can also use a selector:
 
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/PwwgyBy)
+
 ```js
+const portalTargetId = '#portal-target';
 const containerWithPortal = html`
-  <div id="container">
+  <div>
     <div>Some content before</div>
-    <div portal:mount="#portal-target">Content to Portal</div>
+    <div portal:mount=${portalTargetId}>Content to Portal</div>
     <div>Some content after</div>
+    <button onclick=${() => rmPortals(containerWithPortal, document.querySelector(portalTargetId))}>Remove Portal</button>
   </div>
 `;
+van.add(document.body, containerWithPortal);
 ```
 
 ### Removing Portaled Elements
