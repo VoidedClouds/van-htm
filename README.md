@@ -43,9 +43,9 @@ Van HTM provides several prebuilt bundles for browser usage, available via CDN (
 
 Each directory contains:
 
-- `van-htm.mjs` (ESM, minified)
+- `van-htm.js` (ESM, minified)
 - `van-htm.global.js` (IIFE/global, minified)
-- `dev.van-htm.mjs` (ESM, unminified)
+- `dev.van-htm.js` (ESM, unminified)
 - `dev.van-htm.global.js` (IIFE/global, unminified)
 
 ## Additional Usage Information
