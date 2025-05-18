@@ -19,9 +19,9 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 // The imports below can be replaced by script tags like above
 import htm from 'htm';
 import { decode } from 'html-entities';
-import vanHtm from 'vanjs-htm';
+import vanHTM from 'vanjs-htm';
 
-const { html, rmPortals } = vanHtm({ htm, van, vanX, decode });
+const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
 
 const el = html`
   <div>
@@ -35,7 +35,7 @@ van.add(document.body, el);
 
 ## Browser Builds
 
-VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHtm options:
+VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHTM options:
 
 **Build output structure:**
 
@@ -163,7 +163,7 @@ rmPortals(parentContainer, portalTarget?);
 
 ## API
 
-### `vanHtm(options)`
+### `vanHTM(options)`
 
 - `htm`: Required in all builds. The HTM instance.
 - `van`: Required in all builds. The VanJS instance.

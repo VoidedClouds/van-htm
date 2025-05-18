@@ -1,14 +1,14 @@
 import type htm from 'htm';
 import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
 
-export type VanHtmOptions = {
+export type VanHTMOptions = {
   htm: typeof htm | any;
   van: Van | any;
   vanX?: any;
   decode?: (input: string) => string;
 };
 
-export type VanHtm = {
+export type VanHTM = {
   html: (template: TemplateStringsArray, ...substitutions: any[]) => ChildDom;
   rmPortals?: (parent: Node, portalTarget?: Element) => void;
 };
@@ -16,7 +16,7 @@ export type VanHtm = {
 type ControlFlowHandler = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => any;
 type ControlFlow = ControlFlowHandler & { attributes: string[] };
 
-const vanHtm = (options: VanHtmOptions): VanHtm => {
+const vanHTM = (options: VanHTMOptions): VanHTM => {
   const { htm, van } = options;
   let decode: ((input: string) => string) | undefined;
   let vanX: any;
@@ -127,7 +127,7 @@ const vanHtm = (options: VanHtmOptions): VanHtm => {
     return tag(decodedChildren);
   }
 
-  let toReturn: VanHtm = { html: htm.bind(h) };
+  let toReturn: VanHTM = { html: htm.bind(h) };
 
   if (__CONTROL_FLOWS__) {
     const findPortalIds = (parent: Node): string[] => {
@@ -158,4 +158,4 @@ const vanHtm = (options: VanHtmOptions): VanHtm => {
   return toReturn;
 };
 
-export default vanHtm;
+export default vanHTM;
