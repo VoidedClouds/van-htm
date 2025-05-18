@@ -35,7 +35,7 @@ van.add(document.body, el);
 
 ## Browser Builds
 
-VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://cdn.jsdelivr.net/npm/vanjs-htm)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHtm options:
+VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHtm options:
 
 **Build output structure:**
 
