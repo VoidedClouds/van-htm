@@ -2,7 +2,8 @@
   "name": "vanjs-htm",
   "author": "VoidedClouds",
   "license": "MIT",
-  "version": "0.5.0",
+  "version": "0.5.1",
+  "type": "module",
   "description": "HTM with VanJS for JSX-like syntax in vanilla JavaScript using VanJS reactivity.",
   "source": "src/index.ts",
   "files": [
@@ -10,8 +11,8 @@
     "types"
   ],
   "types": "./types/van-htm.d.ts",
-  "main": "./dist/van-htm.global.js",
   "browser": "./dist/van-htm.global.js",
+  "main": "./dist/van-htm.global.js",
   "module": "./dist/van-htm.mjs",
   "exports": {
     ".": {
@@ -22,10 +23,10 @@
     }
   },
   "scripts": {
-    "build": "rimraf dist types && npm run build:js && mv dist/node.js dist/van-htm.cjs && npm run types",
-    "build:js": "tsup",
+    "build": "npm run build:js && npm run types",
+    "build:js": "rimraf dist && tsup && mv dist/node.cjs dist/van-htm.cjs",
     "test": "vitest run tests",
-    "types": "tsc -p tsconfig.build.json && mv types/index.d.ts types/van-htm.d.ts"
+    "types": "rimraf types && tsc -p tsconfig.build.json && mv types/index.d.ts types/van-htm.d.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.12",

@@ -1,6 +1,6 @@
 # Van HTM
 
-A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding.
+A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding. [Here's a sample](https://jsfiddle.net/VoidedClouds/4oxq78ag/) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
 
 ## Features
 
