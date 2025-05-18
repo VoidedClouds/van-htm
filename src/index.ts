@@ -14,7 +14,7 @@ export type VanHTM = {
 };
 
 type ControlFlowHandler = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => any;
-type ControlFlow = ControlFlowHandler & { attributes: string[] };
+type ControlFlow = ControlFlowHandler & { a: string[] };
 
 const vanHTM = (options: VanHTMOptions): VanHTM => {
   const { htm, van } = options;
@@ -35,30 +35,32 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     return value;
   };
   let { assign: objectAssign, entries: objectEntries, hasOwn: objectHas } = Object;
+  let isInstanceOf = (object, constructor) => object instanceof constructor;
+  let _Function = Function;
 
   let directives = {
-    for: { each: 'for:each' },
-    portal: { mount: 'portal:mount' },
-    show: { fallback: 'show:fallback', when: 'show:when' }
+    f: { e: 'for:each' },
+    p: { m: 'portal:mount' },
+    s: { f: 'show:fallback', w: 'show:when' }
   };
 
   let portalIdCounter = 0;
   let controlFlows: Record<string, ControlFlow> = {
-    for: objectAssign(
+    f: objectAssign(
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        let forEach = extractProperty(props, directives.for.each);
+        let forEach = extractProperty(props, directives.f.e);
         return vanX.list(tag(props), forEach, ...children);
       }) as ControlFlowHandler,
-      { attributes: [directives.for.each] }
+      { a: [directives.f.e] }
     ),
-    portal: objectAssign(
+    p: objectAssign(
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        const mount = extractProperty(props, directives.portal.mount);
+        const mount = extractProperty(props, directives.p.m);
         // Determine the target element from the 'mount' prop
         let targetElement: Element | null =
           typeof mount === 'string' // If mount is a string, assume it's a CSS selector
             ? document.querySelector(mount)
-            : mount instanceof Element
+            : isInstanceOf(mount, Element)
             ? mount
             : null; // Otherwise, use mount directly if mount is already a DOM element or null
 
@@ -74,25 +76,25 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
         // Return the comment node as the placeholder
         return comment;
       }) as ControlFlowHandler,
-      { attributes: [directives.portal.mount] }
+      { a: [directives.p.m] }
     ),
-    show: objectAssign(
+    s: objectAssign(
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        let fallback = extractProperty(props, directives.show.fallback) ?? '';
-        let when = extractProperty(props, directives.show.when);
+        let fallback = extractProperty(props, directives.s.f) ?? '';
+        let when = extractProperty(props, directives.s.w);
 
         return () => {
           let condition =
             when?.val !== undefined // Check for .val (state)
               ? when.val
-              : when instanceof Function
+              : isInstanceOf(when, _Function)
               ? when()
               : when; // Otherwise, execute if it's a function or use directly
 
-          return condition ? tag(props, ...children) : fallback instanceof Function ? fallback() : fallback;
+          return condition ? tag(props, ...children) : isInstanceOf(fallback, _Function) ? fallback() : fallback;
         };
       }) as ControlFlowHandler,
-      { attributes: [directives.show.fallback, directives.show.when] }
+      { a: [directives.s.f, directives.s.w] }
     )
   };
 
@@ -115,7 +117,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     if (props) {
       if (__CONTROL_FLOWS__) {
         for (let [_, controlFlow] of objectEntries(controlFlows) as [string, ControlFlow][]) {
-          if (controlFlow.attributes.some((attribute) => objectHas(props, attribute))) {
+          if (controlFlow.a.some((attribute) => objectHas(props, attribute))) {
             return controlFlow(tag, props, decodedChildren);
           }
         }
