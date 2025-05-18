@@ -5,7 +5,7 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 ## Features
 
 - **Tagged Template HTML**: Write JSX-like templates in plain JavaScript using [HTM](https://github.com/developit/htm) with [VanJS](https://vanjs.org), no build step required.
-- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering and portals (requires [VanX](https://vanjs.org/x)).
+- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering (requires [VanX](https://vanjs.org/x)).
 - **HTML Entity Decoding**: Decode HTML entities in string children (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
 
 ## Usage
@@ -15,7 +15,8 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 ```js
 // <script src='https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.5.nomodule.min.js'></script>
 // <script src='https://cdn.jsdelivr.net/npm/vanjs-ext@0.6.2/dist/van-x.nomodule.min.js'></script>
-// The imports below could also be globally available
+
+// The imports below can be replaced by script tags like above
 import htm from 'htm';
 import { decode } from 'html-entities';
 import vanHtm from 'vanjs-htm';
