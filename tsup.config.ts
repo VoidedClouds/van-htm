@@ -54,7 +54,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: 
     },
     external: ['alien-signals'],
     format: node ? 'cjs' : ['esm', 'iife'],
-    globalName: node ? undefined : 'vanHtm',
+    globalName: node ? undefined : 'vanHTM',
     outDir,
     treeshake: true,
     minify: dev ? false : true,

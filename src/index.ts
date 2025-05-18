@@ -36,6 +36,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   };
   let { assign: objectAssign, entries: objectEntries, hasOwn: objectHas } = Object;
   let isInstanceOf = (object, constructor) => object instanceof constructor;
+  let isTypeOfString = (value) => typeof value === 'string';
   let _Function = Function;
 
   let directives = {
@@ -57,12 +58,11 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
         const mount = extractProperty(props, directives.p.m);
         // Determine the target element from the 'mount' prop
-        let targetElement: Element | null =
-          typeof mount === 'string' // If mount is a string, assume it's a CSS selector
-            ? document.querySelector(mount)
-            : isInstanceOf(mount, Element)
-            ? mount
-            : null; // Otherwise, use mount directly if mount is already a DOM element or null
+        let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
+          ? document.querySelector(mount)
+          : isInstanceOf(mount, Element)
+          ? mount
+          : null; // Otherwise, use mount directly if mount is already a DOM element or null
 
         const portalId = `pid-${portalIdCounter++}`;
         props['portal:id'] = portalId;
@@ -111,7 +111,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     let tag: TagFunc<Element> = van.tags[type];
 
     const decodedChildren = __HTML_ENTITY_DECODING__
-      ? children?.map((child: ChildDom) => (typeof child === 'string' ? decode!(child) : child))
+      ? children?.map((child: ChildDom) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
     if (props) {
