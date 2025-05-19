@@ -13,7 +13,7 @@ export type VanHTM = {
   rmPortals?: (parent: Node, portalTarget?: Element) => void;
 };
 
-type ControlFlowHandler = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => any;
+type ControlFlowHandler = (tagOrNode: TagFunc<Element> | Node, props: Props, children: ChildDom[], isTag?: boolean) => any;
 type ControlFlow = ControlFlowHandler & { a: string[] };
 
 const vanHTM = (options: VanHTMOptions): VanHTM => {
@@ -29,73 +29,81 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     decode = options?.decode;
   }
 
-  let extractProperty = (object: Props, key: string): any => {
-    let value = object[key];
+  const extractProperty = (object: Props, key: string): any => {
+    const value = object[key];
     delete object[key];
     return value;
   };
-  let { assign: objectAssign, entries: objectEntries, hasOwn: objectHas } = Object;
-  let isInstanceOf = (object, constructor) => object instanceof constructor;
-  let isTypeOfString = (value) => typeof value === 'string';
-  let _Function = Function;
+  const { assign: objectAssign, entries: objectEntries, hasOwn: objectHas } = Object;
+  const isFunctionInstance = (object) => object instanceof Function;
+  const isTypeOfString = (value) => typeof value === 'string';
 
-  let directives = {
+  const _document = document;
+  const _undefined = undefined;
+
+  const directives = {
     f: { e: 'for:each' },
     p: { m: 'portal:mount' },
     s: { f: 'show:fallback', w: 'show:when' }
   };
 
+  const showHandler = (tagOrNode: TagFunc<Element> | Node, props: Props, children: ChildDom[] | undefined, isTag: boolean = true) => {
+    let fallback = extractProperty(props, directives.s.f) ?? '';
+    let when = extractProperty(props, directives.s.w);
+
+    return () => {
+      let condition =
+        when?.val !== undefined // Check for .val (state)
+          ? when.val
+          : isFunctionInstance(when)
+          ? when()
+          : when; // Otherwise, execute if it's a function or use directly
+
+      return condition
+        ? isTag
+          ? (tagOrNode as TagFunc<Element>)(props, ...(children as ChildDom[]))
+          : tagOrNode
+        : isFunctionInstance(fallback)
+        ? fallback()
+        : fallback;
+    };
+  };
+  const hasShowWhenProperty = (props) => objectHas(props, directives.s.w);
+
   let portalIdCounter = 0;
-  let controlFlows: Record<string, ControlFlow> = {
+  const controlFlows: Record<string, ControlFlow> = {
+    // For
     f: objectAssign(
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        let forEach = extractProperty(props, directives.f.e);
-        return vanX.list(tag(props), forEach, ...children);
+        const list = vanX.list(tag(props), extractProperty(props, directives.f.e), ...children);
+        return hasShowWhenProperty(props) ? showHandler(list, props, _undefined, false) : list;
       }) as ControlFlowHandler,
       { a: [directives.f.e] }
     ),
+    // Portal
     p: objectAssign(
       ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
         const mount = extractProperty(props, directives.p.m);
         // Determine the target element from the 'mount' prop
         let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
-          ? document.querySelector(mount)
-          : isInstanceOf(mount, Element)
-          ? mount
-          : null; // Otherwise, use mount directly if mount is already a DOM element or null
+          ? _document.querySelector(mount)
+          : mount; // Otherwise, use mount directly if mount
 
         const portalId = `pid-${portalIdCounter++}`;
         props['portal:id'] = portalId;
 
         // Create the portal content
-        van.add(targetElement, tag(props, ...children));
+        const portalContent = tag(props, ...children);
+        van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContent, props, _undefined, false) : portalContent);
 
         // Create a unique comment node as a placeholder
-        const comment = document.createComment(portalId);
-
         // Return the comment node as the placeholder
-        return comment;
+        return _document.createComment(portalId);
       }) as ControlFlowHandler,
       { a: [directives.p.m] }
     ),
-    s: objectAssign(
-      ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        let fallback = extractProperty(props, directives.s.f) ?? '';
-        let when = extractProperty(props, directives.s.w);
-
-        return () => {
-          let condition =
-            when?.val !== undefined // Check for .val (state)
-              ? when.val
-              : isInstanceOf(when, _Function)
-              ? when()
-              : when; // Otherwise, execute if it's a function or use directly
-
-          return condition ? tag(props, ...children) : isInstanceOf(fallback, _Function) ? fallback() : fallback;
-        };
-      }) as ControlFlowHandler,
-      { a: [directives.s.f, directives.s.w] }
-    )
+    // Show
+    s: objectAssign(showHandler as ControlFlowHandler, { a: [directives.s.f, directives.s.w] })
   };
 
   /**
@@ -132,7 +140,13 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   let toReturn: VanHTM = { html: htm.bind(h) };
 
   if (__CONTROL_FLOWS__) {
-    const findPortalIds = (parent: Node): string[] => {
+    /**
+     * Removes portal elements from the DOM based on portal IDs found in comments.
+     *
+     * @param {Node} parent - The parent node to search for portal comment IDs.
+     * @param {Element} [portalTarget] - Optional target element to search for portal elements. Defaults to document.body if not provided.
+     */
+    toReturn.rmPortals = (parent: Node, portalTarget: Element = _document.body): void => {
       const result: string[] = [];
       for (let child = parent.firstChild; child; child = child.nextSibling) {
         if (child.nodeType === Node.COMMENT_NODE && (child as Comment).data.startsWith('pid-')) {
@@ -140,19 +154,9 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
         }
       }
 
-      return result;
-    };
-
-    /**
-     * Removes portal elements from the DOM based on portal IDs found in comments.
-     *
-     * @param {Node} parent - The parent node to search for portal comment IDs.
-     * @param {Element} [portalTarget] - Optional target element to search for portal elements. Defaults to document.body if not provided.
-     */
-    toReturn.rmPortals = (parent: Node, portalTarget: Element = document.body): void => {
-      findPortalIds(parent).forEach((portalId) => {
-        // Find and remove all elements with attribute portal:id === portalId
-        portalTarget.querySelectorAll(`[portal\\:id="${portalId}"]`).forEach((el) => el.remove());
+      result.forEach((portalId) => {
+        // Find and remove the portaled element with attribute portal:id === portalId
+        portalTarget.querySelector(`[portal\\:id="${portalId}"]`)?.remove();
       });
     };
   }
