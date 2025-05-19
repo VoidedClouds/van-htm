@@ -131,10 +131,10 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
         }
       }
 
-      return tag(props, decodedChildren);
+      return tag(props, ...decodedChildren);
     }
 
-    return tag(decodedChildren);
+    return tag(...decodedChildren);
   }
 
   let toReturn: VanHTM = { html: htm.bind(h) };
