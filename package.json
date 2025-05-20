@@ -8,6 +8,7 @@
     "dist",
     "types"
   ],
+  "type": "module",
   "types": "./types/van-htm.d.ts",
   "main": "./dist/van-htm.js",
   "module": "./dist/van-htm.esm.js",
