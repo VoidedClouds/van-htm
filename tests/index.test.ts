@@ -550,135 +550,208 @@ describe('html', function () {
         expect(portalTarget.textContent).toBe('');
       });
     });
-  });
 
-  describe('combining show with for', () => {
-    it('shows and hides the entire list when toggling show:when', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+    describe('combining show with for', () => {
+      it('shows and hides the entire list when toggling show:when', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
-      const items = vanX.reactive([1, 2, 3]);
-      const visible = van.state(true);
-      const el = html`
-        <ul for:each=${items} show:when=${visible}>
-          ${(v) =>
-            html`
-              <li>${v}</li>
-            `}
-        </ul>
-      `;
-      van.add(container, el);
+        const items = vanX.reactive([1, 2, 3]);
+        const visible = van.state(true);
+        const el = html`
+          <ul for:each=${items} show:when=${visible}>
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
 
-      expect(container.querySelectorAll('li').length).toBe(3);
+        expect(container.querySelectorAll('li').length).toBe(3);
 
-      visible.val = false;
-      await promisedTimeout();
-      expect(container.querySelectorAll('li').length).toBe(0);
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
 
-      visible.val = true;
-      await promisedTimeout();
-      expect(container.querySelectorAll('li').length).toBe(3);
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(3);
+      });
+
+      it('renders fallback when show:when is false', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const items = vanX.reactive([1, 2]);
+        const visible = van.state(false);
+        const el = html`
+          <ul for:each=${items} show:when=${visible} show:fallback="No items">
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
+
+        expect(container.textContent).toBe('No items');
+
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(2);
+      });
+
+      it('renders nothing when show:when is false and no fallback', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const items = vanX.reactive([1]);
+        const visible = van.state(false);
+        const el = html`
+          <ul for:each=${items} show:when=${visible}>
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
+
+        expect(container.textContent).toBe('');
+      });
+
+      it('updates list after toggling visibility', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const items = vanX.reactive([1, 2]);
+        const visible = van.state(true);
+        const el = html`
+          <ul for:each=${items} show:when=${visible}>
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
+
+        // Initially visible
+        expect(container.querySelectorAll('li').length).toBe(2);
+        expect(container.textContent).toBe('12');
+
+        // Hide the list
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Show the list again
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(2);
+        expect(container.textContent).toBe('12');
+
+        // Mutate the list
+        items.push(3, 4);
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(4);
+        expect(container.textContent).toBe('1234');
+
+        // Hide the list
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Show the list again
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(4);
+        expect(container.textContent).toBe('1234');
+
+        // Mutate the list
+        items.push(5, 6, 7);
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(7);
+        expect(container.textContent).toBe('1234567');
+
+        // Hide the list
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Show the list again
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(7);
+        expect(container.textContent).toBe('1234567');
+      });
     });
 
-    it('renders fallback when show:when is false', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+    describe('combining show with portal', () => {
+      let portalTarget: HTMLElement;
 
-      const items = vanX.reactive([1, 2]);
-      const visible = van.state(false);
-      const el = html`
-        <ul for:each=${items} show:when=${visible} show:fallback="No items">
-          ${(v) =>
-            html`
-              <li>${v}</li>
-            `}
-        </ul>
-      `;
-      van.add(container, el);
+      beforeEach(() => {
+        portalTarget = document.createElement('div');
+        portalTarget.id = 'portal-target-combo';
+        document.body.appendChild(portalTarget);
+      });
 
-      expect(container.textContent).toBe('No items');
+      afterEach(() => {
+        portalTarget.remove();
+      });
 
-      visible.val = true;
-      await promisedTimeout();
-      expect(container.querySelectorAll('li').length).toBe(2);
-    });
+      it('shows and hides portaled content when toggling show:when', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
-    it('renders nothing when show:when is false and no fallback', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+        const visible = van.state(true);
+        const el = html`
+          <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
+        `;
+        container.appendChild(el as Node);
 
-      const items = vanX.reactive([1]);
-      const visible = van.state(false);
-      const el = html`
-        <ul for:each=${items} show:when=${visible}>
-          ${(v) =>
-            html`
-              <li>${v}</li>
-            `}
-        </ul>
-      `;
-      van.add(container, el);
+        expect(portalTarget.textContent).toBe('PortaledShow');
 
-      expect(container.textContent).toBe('');
-    });
-  });
+        visible.val = false;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('');
 
-  describe('combining show with portal', () => {
-    let portalTarget: HTMLElement;
+        visible.val = true;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('PortaledShow');
+      });
 
-    beforeEach(() => {
-      portalTarget = document.createElement('div');
-      portalTarget.id = 'portal-target-combo';
-      document.body.appendChild(portalTarget);
-    });
+      it('renders fallback in portal when show:when is false', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
-    afterEach(() => {
-      portalTarget.remove();
-    });
+        const visible = van.state(false);
+        const el = html`
+          <div portal:mount="#portal-target-combo" show:when=${visible} show:fallback="HiddenPortal">PortaledShow</div>
+        `;
+        container.appendChild(el as Node);
 
-    it('shows and hides portaled content when toggling show:when', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+        expect(portalTarget.textContent).toBe('HiddenPortal');
 
-      const visible = van.state(true);
-      const el = html`
-        <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
-      `;
-      container.appendChild(el as Node);
+        visible.val = true;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('PortaledShow');
 
-      expect(portalTarget.textContent).toBe('PortaledShow');
+        visible.val = false;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('HiddenPortal');
+      });
 
-      visible.val = false;
-      await promisedTimeout();
-      expect(portalTarget.textContent).toBe('');
+      it('renders nothing in portal when show:when is false and no fallback', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
-      visible.val = true;
-      await promisedTimeout();
-      expect(portalTarget.textContent).toBe('PortaledShow');
-    });
+        const visible = van.state(false);
+        const el = html`
+          <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
+        `;
+        container.appendChild(el as Node);
 
-    it('renders fallback in portal when show:when is false', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+        expect(portalTarget.textContent).toBe('');
 
-      const visible = van.state(false);
-      const el = html`
-        <div portal:mount="#portal-target-combo" show:when=${visible} show:fallback="HiddenPortal">PortaledShow</div>
-      `;
-      container.appendChild(el as Node);
-
-      expect(portalTarget.textContent).toBe('HiddenPortal');
-
-      visible.val = true;
-      await promisedTimeout();
-      expect(portalTarget.textContent).toBe('PortaledShow');
-    });
-
-    it('renders nothing in portal when show:when is false and no fallback', async () => {
-      if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
-      const visible = van.state(false);
-      const el = html`
-        <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
-      `;
-      container.appendChild(el as Node);
-
-      expect(portalTarget.textContent).toBe('');
+        visible.val = true;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('PortaledShow');
+      });
     });
   });
 });
