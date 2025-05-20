@@ -50,6 +50,11 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
     entry: {
       [node ? 'van-htm' : dev ? 'dev.van-htm' : 'van-htm']: 'src/index.ts'
     },
+    outExtension({ format }) {
+      return {
+        js: `.${format}.js`
+      };
+    },
     external: ['alien-signals'],
     format: node ? 'cjs' : ['esm', 'iife'],
     globalName: node ? undefined : 'vanHTM',
