@@ -10,6 +10,9 @@ build/
 out/
 types/
 
+# Test outputs
+coverage/
+
 # TypeScript
 *.tsbuildinfo
 

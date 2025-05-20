@@ -89,7 +89,7 @@ describe('html', function () {
     });
   });
 
-  describe('HTML entities', function () {
+  describe('HTML Entities', function () {
     it('decodes HTML entities if enabled', function () {
       if (!(globalThis as any).__HTML_ENTITY_DECODING__) return this?.skip?.();
       const el = html`
@@ -276,10 +276,30 @@ describe('html', function () {
 
     describe('show directive', () => {
       describe('without reactivity', () => {
+        beforeEach(() => {
+          container = document.createElement('div');
+          document.body.appendChild(container);
+        });
+
+        afterEach(() => {
+          container.remove();
+        });
+
         it('renders when condition is true', () => {
           if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
           const el = html`
             <div show:when=${true}>Visible</div>
+          `;
+          container.append((el as Function)());
+          expect(container.textContent).toBe('Visible');
+        });
+
+        it('renders when condition is true from Function', () => {
+          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+          const el = html`
+            <div show:when=${() => true}>Visible</div>
           `;
           container.append((el as Function)());
           expect(container.textContent).toBe('Visible');
@@ -303,6 +323,46 @@ describe('html', function () {
           `;
           container.append((el as Function)());
           expect(container.textContent).toBe('');
+        });
+
+        it('renders fallback when show:when is 0', () => {
+          if (!(globalThis as any).__CONTROL_FLOWS__) return;
+
+          const el = html`
+            <div show:when=${0} show:fallback="Zero">Visible</div>
+          `;
+          container.append((el as Function)());
+          expect(container.textContent).toBe('Zero');
+        });
+
+        it('renders fallback when show:when is empty string', () => {
+          if (!(globalThis as any).__CONTROL_FLOWS__) return;
+
+          const el = html`
+            <div show:when=${''} show:fallback="Empty">Visible</div>
+          `;
+          container.append((el as Function)());
+          expect(container.textContent).toBe('Empty');
+        });
+
+        it('renders fallback when show:when is null', () => {
+          if (!(globalThis as any).__CONTROL_FLOWS__) return;
+
+          const el = html`
+            <div show:when=${null} show:fallback="Null">Visible</div>
+          `;
+          container.append((el as Function)());
+          expect(container.textContent).toBe('Null');
+        });
+
+        it('renders fallback when show:when is undefined', () => {
+          if (!(globalThis as any).__CONTROL_FLOWS__) return;
+
+          const el = html`
+            <div show:when=${undefined} show:fallback="Undefined">Visible</div>
+          `;
+          container.append((el as Function)());
+          expect(container.textContent).toBe('Undefined');
         });
       });
 
@@ -370,11 +430,13 @@ describe('html', function () {
 
     describe('portal directive', () => {
       let portalTarget: HTMLElement;
+      let portalTargetId = 'portal-target';
+      let portalTargetSelector = `#${portalTargetId}`;
       let otherContainer: HTMLElement;
 
       beforeEach(() => {
         portalTarget = document.createElement('div');
-        portalTarget.id = 'portal-target';
+        portalTarget.id = portalTargetId;
         document.body.appendChild(portalTarget);
 
         otherContainer = document.createElement('div');
@@ -386,6 +448,16 @@ describe('html', function () {
         otherContainer.remove();
       });
 
+      it('mounts content to a target element by element reference', () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const el = html`
+          <div portal:mount=${portalTarget}>PortaledRef</div>
+        `;
+        container.appendChild(el as Node);
+        expect(portalTarget.textContent).toBe('PortaledRef');
+      });
+
       it('mounts content to a target element by selector', () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
@@ -395,16 +467,6 @@ describe('html', function () {
         // The returned node is a comment, not the actual element
         container.appendChild(el as Node);
         expect(portalTarget.textContent).toBe('Portaled');
-      });
-
-      it('mounts content to a target element by element reference', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
-        const el = html`
-          <div portal:mount=${portalTarget}>PortaledRef</div>
-        `;
-        container.appendChild(el as Node);
-        expect(portalTarget.textContent).toBe('PortaledRef');
       });
 
       it('does not mount if target is null', () => {
@@ -436,6 +498,23 @@ describe('html', function () {
         expect(portalTarget.textContent).toBe('');
       });
 
+      it('removes portaled elements from the portal target by selector', () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        // Mount a portaled element
+        const el = html`
+          <div portal:mount="#portal-target">Portaled</div>
+        `;
+        container.appendChild(el as Node);
+
+        // Confirm it's present
+        expect(portalTarget.textContent).toBe('Portaled');
+        // Remove portaled elements
+        rmPortals!(container, portalTargetSelector);
+        // Should be gone
+        expect(portalTarget.textContent).toBe('');
+      });
+
       it('removes multiple portaled elements', () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
@@ -452,6 +531,26 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('Two');
 
         rmPortals!(container, portalTarget);
+
+        expect(portalTarget.textContent).toBe('');
+      });
+
+      it('removes multiple portaled elements by selector', () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const el1 = html`
+          <div portal:mount="#portal-target">One</div>
+        `;
+        const el2 = html`
+          <div portal:mount="#portal-target">Two</div>
+        `;
+        container.appendChild(el1 as Node);
+        container.appendChild(el2 as Node);
+
+        expect(portalTarget.textContent).toContain('One');
+        expect(portalTarget.textContent).toContain('Two');
+
+        rmPortals!(container, portalTargetSelector);
 
         expect(portalTarget.textContent).toBe('');
       });
@@ -479,11 +578,42 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('FromOtherContainer');
       });
 
+      it('removes only portaled elements for the specified container and portalTarget by selector', () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        // Add two portaled elements from different containers
+        const el1 = html`
+          <div portal:mount="#portal-target">FromContainer</div>
+        `;
+        const el2 = html`
+          <div portal:mount="#portal-target">FromOtherContainer</div>
+        `;
+        container.appendChild(el1 as Node);
+        otherContainer.appendChild(el2 as Node);
+
+        expect(portalTarget.textContent).toContain('FromContainer');
+        expect(portalTarget.textContent).toContain('FromOtherContainer');
+
+        // Remove only those belonging to `container`
+        rmPortals!(container, portalTargetSelector);
+
+        expect(portalTarget.textContent).not.toContain('FromContainer');
+        expect(portalTarget.textContent).toContain('FromOtherContainer');
+      });
+
       it('does not throw if there are no portaled elements', () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
         // No portaled elements
         expect(() => rmPortals!(container, portalTarget)).not.toThrow();
+        expect(portalTarget.textContent).toBe('');
+      });
+
+      it('does not throw if there are no portaled elements by selector', () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        // No portaled elements
+        expect(() => rmPortals!(container, portalTargetSelector)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
 
@@ -552,32 +682,6 @@ describe('html', function () {
     });
 
     describe('combining show with for', () => {
-      it('shows and hides the entire list when toggling show:when', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
-        const items = vanX.reactive([1, 2, 3]);
-        const visible = van.state(true);
-        const el = html`
-          <ul for:each=${items} show:when=${visible}>
-            ${(v) =>
-              html`
-                <li>${v}</li>
-              `}
-          </ul>
-        `;
-        van.add(container, el);
-
-        expect(container.querySelectorAll('li').length).toBe(3);
-
-        visible.val = false;
-        await promisedTimeout();
-        expect(container.querySelectorAll('li').length).toBe(0);
-
-        visible.val = true;
-        await promisedTimeout();
-        expect(container.querySelectorAll('li').length).toBe(3);
-      });
-
       it('renders fallback when show:when is false', async () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
@@ -616,6 +720,32 @@ describe('html', function () {
         van.add(container, el);
 
         expect(container.textContent).toBe('');
+      });
+
+      it('shows and hides the entire list when toggling show:when', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const items = vanX.reactive([1, 2, 3]);
+        const visible = van.state(true);
+        const el = html`
+          <ul for:each=${items} show:when=${visible}>
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
+
+        expect(container.querySelectorAll('li').length).toBe(3);
+
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(3);
       });
 
       it('updates list after toggling visibility', async () => {
@@ -682,6 +812,58 @@ describe('html', function () {
         expect(container.querySelectorAll('li').length).toBe(7);
         expect(container.textContent).toBe('1234567');
       });
+
+      it('updates list while hidden in between toggling visibility', async () => {
+        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
+
+        const items = vanX.reactive([1, 2]);
+        const visible = van.state(true);
+        const el = html`
+          <ul for:each=${items} show:when=${visible}>
+            ${(v) =>
+              html`
+                <li>${v}</li>
+              `}
+          </ul>
+        `;
+        van.add(container, el);
+
+        // Initially visible
+        expect(container.querySelectorAll('li').length).toBe(2);
+        expect(container.textContent).toBe('12');
+
+        // Hide the list
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Mutate the list while hidden
+        items.push(3, 4);
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Show the list with mutated data
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(4);
+        expect(container.textContent).toBe('1234');
+
+        // Hide the list
+        visible.val = false;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Mutate the list while hidden
+        items.push(5, 6, 7);
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(0);
+
+        // Show the list with mutated data
+        visible.val = true;
+        await promisedTimeout();
+        expect(container.querySelectorAll('li').length).toBe(7);
+        expect(container.textContent).toBe('1234567');
+      });
     });
 
     describe('combining show with portal', () => {
@@ -715,6 +897,10 @@ describe('html', function () {
         visible.val = true;
         await promisedTimeout();
         expect(portalTarget.textContent).toBe('PortaledShow');
+
+        // Remove the portal and verify it is removed
+        rmPortals!(container, portalTarget);
+        expect(portalTarget.textContent).toBe('');
       });
 
       it('renders fallback in portal when show:when is false', async () => {
@@ -735,6 +921,14 @@ describe('html', function () {
         visible.val = false;
         await promisedTimeout();
         expect(portalTarget.textContent).toBe('HiddenPortal');
+
+        visible.val = true;
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('PortaledShow');
+
+        // Remove the portal and verify it is removed
+        rmPortals!(container, portalTarget);
+        expect(portalTarget.textContent).toBe('');
       });
 
       it('renders nothing in portal when show:when is false and no fallback', async () => {
@@ -751,6 +945,10 @@ describe('html', function () {
         visible.val = true;
         await promisedTimeout();
         expect(portalTarget.textContent).toBe('PortaledShow');
+
+        // Remove the portal and verify it is removed
+        rmPortals!(container, portalTarget);
+        expect(portalTarget.textContent).toBe('');
       });
     });
   });

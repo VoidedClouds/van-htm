@@ -9,6 +9,10 @@ export default defineConfig({
     __HTML_ENTITY_DECODING__: 'true'
   },
   test: {
+    coverage: {
+      include: ['src/**/*.{js,ts,jsx,tsx}'],
+      exclude: ['src/**/*.d.{js,ts,jsx,tsx}', '**/vitest.js']
+    },
     environment: 'jsdom',
     globals: true
   }
