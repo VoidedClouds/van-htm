@@ -17,20 +17,20 @@
       "import": "./dist/van-htm.module.js",
       "require": "./dist/van-htm.cjs"
     },
-    "./wDec": {
+    "./withDecoding": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/wDec/van-htm.module.js",
-      "require": "./dist/wDec/van-htm.cjs"
+      "import": "./dist/withDecoding/van-htm.module.js",
+      "require": "./dist/withDecoding/van-htm.cjs"
     },
-    "./wDec-woCF": {
+    "./withDecoding-withoutControlFlows": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/wDec-woCF/van-htm.module.js",
-      "require": "./dist/wDec-woCF/van-htm.cjs"
+      "import": "./dist/withDecoding-withoutControlFlows/van-htm.module.js",
+      "require": "./dist/withDecoding-withoutControlFlows/van-htm.cjs"
     },
-    "./woCF": {
+    "./withoutControlFlows": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/woCF/van-htm.module.js",
-      "require": "./dist/woCF/van-htm.cjs"
+      "import": "./dist/withoutControlFlows/van-htm.module.js",
+      "require": "./dist/withoutControlFlows/van-htm.cjs"
     }
   },
   "scripts": {

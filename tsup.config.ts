@@ -36,11 +36,11 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
   let outDir = 'dist';
 
   if (controlFlows === false && htmlEntityDecoding === true) {
-    outDir = 'dist/wDec-woCF';
+    outDir = 'dist/withDecoding-withoutControlFlows';
   } else if (controlFlows === false) {
-    outDir = 'dist/woCF';
+    outDir = 'dist/withoutControlFlows';
   } else if (htmlEntityDecoding === true) {
-    outDir = 'dist/wDec';
+    outDir = 'dist/withDecoding';
   }
 
   return {
@@ -80,19 +80,19 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
 export default defineConfig([
   // Dev builds
   options({ dev: true, controlFlows: true, htmlEntityDecoding: false }), // dev
-  options({ dev: true, controlFlows: true, htmlEntityDecoding: true }), // dev-wDec
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: true }), // dev-wDec-woCF
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: false }), // dev-woCF
+  options({ dev: true, controlFlows: true, htmlEntityDecoding: true }), // dev-withDecoding
+  options({ dev: true, controlFlows: false, htmlEntityDecoding: true }), // dev-withDecoding-withoutControlFlows
+  options({ dev: true, controlFlows: false, htmlEntityDecoding: false }), // dev-withoutControlFlows
 
   // Prod builds
   options({ dev: false, controlFlows: true, htmlEntityDecoding: false }), // prod
-  options({ dev: false, controlFlows: true, htmlEntityDecoding: true }), // prod-wDec
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-wDec-woCF
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-woCF
+  options({ dev: false, controlFlows: true, htmlEntityDecoding: true }), // prod-withDecoding
+  options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-withDecoding-withoutControlFlows
+  options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-withoutControlFlows
 
   // Node build (single)
   options({ node: true, controlFlows: true, htmlEntityDecoding: false }), // server
-  options({ node: true, controlFlows: true, htmlEntityDecoding: true }), // server-wDec
-  options({ node: true, controlFlows: false, htmlEntityDecoding: true }), // server-wDec-woCF
-  options({ node: true, controlFlows: false, htmlEntityDecoding: false }) // server-woCF
+  options({ node: true, controlFlows: true, htmlEntityDecoding: true }), // server-withDecoding
+  options({ node: true, controlFlows: false, htmlEntityDecoding: true }), // server-withDecoding-withoutControlFlows
+  options({ node: true, controlFlows: false, htmlEntityDecoding: false }) // server-withoutControlFlows
 ]);
