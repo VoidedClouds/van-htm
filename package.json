@@ -14,25 +14,21 @@
   "exports": {
     ".": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/van-htm.module.js",
       "import": "./dist/van-htm.module.js",
       "require": "./dist/van-htm.cjs"
     },
     "./wDec": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/wDec/van-htm.module.js",
       "import": "./dist/wDec/van-htm.module.js",
       "require": "./dist/wDec/van-htm.cjs"
     },
     "./wDec-woCF": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/wDec-woCF/van-htm.module.js",
       "import": "./dist/wDec-woCF/van-htm.module.js",
       "require": "./dist/wDec-woCF/van-htm.cjs"
     },
     "./woCF": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/woCF/van-htm.module.js",
       "import": "./dist/woCF/van-htm.module.js",
       "require": "./dist/woCF/van-htm.cjs"
     }
