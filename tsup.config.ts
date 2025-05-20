@@ -52,7 +52,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
     },
     outExtension({ format }) {
       return {
-        js: `.${format}.js`
+        js: format === 'iife' ? `.js` : `.${format}.js`
       };
     },
     external: ['alien-signals'],

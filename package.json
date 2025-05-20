@@ -9,30 +9,30 @@
     "types"
   ],
   "types": "./types/van-htm.d.ts",
-  "main": "./dist/van-htm.esm.js",
+  "main": "./dist/van-htm.js",
   "module": "./dist/van-htm.esm.js",
   "exports": {
     ".": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/van-htm.iife.js",
+      "browser": "./dist/van-htm.js",
       "import": "./dist/van-htm.esm.js",
       "require": "./dist/van-htm.cjs.js"
     },
     "./wDec": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/wDec/van-htm.iife.js",
+      "browser": "./dist/wDec/van-htm.js",
       "import": "./dist/wDec/van-htm.esm.js",
       "require": "./dist/wDec/van-htm.cjs.js"
     },
     "./wDec-woCF": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/wDec-woCF/van-htm.iife.js",
+      "browser": "./dist/wDec-woCF/van-htm.js",
       "import": "./dist/wDec-woCF/van-htm.esm.js",
       "require": "./dist/wDec-woCF/van-htm.cjs.js"
     },
     "./woCF": {
       "types": "./types/van-htm.d.ts",
-      "browser": "./dist/woCF/van-htm.iife.js",
+      "browser": "./dist/woCF/van-htm.js",
       "import": "./dist/woCF/van-htm.esm.js",
       "require": "./dist/woCF/van-htm.cjs.js"
     }
