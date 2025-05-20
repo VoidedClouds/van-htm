@@ -17,7 +17,7 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 // <script src='https://cdn.jsdelivr.net/npm/vanjs-ext@0.6.2/dist/van-x.nomodule.min.js'></script>
 
 // The imports below can be replaced by script tags like above
-import htm from 'htm/mini';
+import htm from 'htm';
 import vanHTM from 'vanjs-htm';
 
 const { html, rmPortals } = vanHTM({ htm, van, vanX });

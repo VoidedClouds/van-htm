@@ -1,4 +1,4 @@
-import htm from 'htm/mini';
+import htm from 'htm';
 import { decode } from 'html-entities';
 import van from 'vanjs-core';
 import * as vanX from 'vanjs-ext';
