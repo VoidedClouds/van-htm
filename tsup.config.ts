@@ -10,7 +10,7 @@ interface BundleOptions {
   htmlEntityDecoding?: boolean;
 }
 
-function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: BundleOptions): Options {
+function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }: BundleOptions): Options {
   const plugin: Plugin = {
     name: 'remove-console-warn',
     setup(build) {
@@ -35,14 +35,12 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: 
   // Determine output directory
   let outDir = 'dist';
 
-  if (!node) {
-    if (controlFlows === false && htmlEntityDecoding === false) {
-      outDir = 'dist/noCF-noDec';
-    } else if (controlFlows === false) {
-      outDir = 'dist/noCF';
-    } else if (htmlEntityDecoding === false) {
-      outDir = 'dist/noDec';
-    }
+  if (controlFlows === false && htmlEntityDecoding === true) {
+    outDir = 'dist/wDec-woCF';
+  } else if (controlFlows === false) {
+    outDir = 'dist/woCF';
+  } else if (htmlEntityDecoding === true) {
+    outDir = 'dist/wDec';
   }
 
   return {
@@ -50,7 +48,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: 
     clean: true,
     // dts: true,
     entry: {
-      [node ? 'node' : dev ? 'dev.van-htm' : 'van-htm']: 'src/index.ts'
+      [node ? 'van-htm' : dev ? 'dev.van-htm' : 'van-htm']: 'src/index.ts'
     },
     external: ['alien-signals'],
     format: node ? 'cjs' : ['esm', 'iife'],
@@ -76,17 +74,20 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = true, node }: 
 
 export default defineConfig([
   // Dev builds
-  options({ dev: true, controlFlows: true, htmlEntityDecoding: true }), // dev
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: true }), // dev-noCF
-  options({ dev: true, controlFlows: true, htmlEntityDecoding: false }), // dev-noDec
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: false }), // dev-noCF-noDec
+  options({ dev: true, controlFlows: true, htmlEntityDecoding: false }), // dev
+  options({ dev: true, controlFlows: true, htmlEntityDecoding: true }), // dev-wDec
+  options({ dev: true, controlFlows: false, htmlEntityDecoding: true }), // dev-wDec-woCF
+  options({ dev: true, controlFlows: false, htmlEntityDecoding: false }), // dev-woCF
 
   // Prod builds
-  options({ dev: false, controlFlows: true, htmlEntityDecoding: true }), // prod
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-noCF
-  options({ dev: false, controlFlows: true, htmlEntityDecoding: false }), // prod-noDec
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-noCF-noDec
+  options({ dev: false, controlFlows: true, htmlEntityDecoding: false }), // prod
+  options({ dev: false, controlFlows: true, htmlEntityDecoding: true }), // prod-wDec
+  options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-wDec-woCF
+  options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-woCF
 
   // Node build (single)
-  options({ node: true, controlFlows: false, htmlEntityDecoding: true }) // server
+  options({ node: true, controlFlows: true, htmlEntityDecoding: false }), // server
+  options({ node: true, controlFlows: true, htmlEntityDecoding: true }), // server-wDec
+  options({ node: true, controlFlows: false, htmlEntityDecoding: true }), // server-wDec-woCF
+  options({ node: true, controlFlows: false, htmlEntityDecoding: false }) // server-woCF
 ]);
