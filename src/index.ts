@@ -1,4 +1,4 @@
-import type htm from 'htm';
+import type htm from 'htm/mini';
 import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
 
 export type VanHTMOptions = {

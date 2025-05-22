@@ -17,7 +17,7 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 // <script src='https://cdn.jsdelivr.net/npm/vanjs-ext@0.6.2/dist/van-x.nomodule.min.js'></script>
 
 // The imports below can be replaced by script tags like above
-import htm from 'htm';
+import htm from 'htm/mini';
 import vanHTM from 'vanjs-htm';
 
 const { html, rmPortals } = vanHTM({ htm, van, vanX });
@@ -230,41 +230,6 @@ const el = html`
 `;
 van.add(document.body, el);
 ```
-
-### Notes About [HTM](https://github.com/developit/htm)
-
-HTM caches template strings and the DOM node for each unique template string.  
-**Each iterative call** to `html\`...\`` with the same template string returns the **same DOM node instance**. If you append a node multiple times, the browser will move it rather than duplicate it, so only one instance will exist in the DOM.
-
-For example:
-
-```js
-for (let i = 0; i < 2; i++) {
-  document.body.appendChild(
-    html`
-      <div>Hello, World!</div>
-    `
-  );
-  document.body.appendChild(
-    html`
-      <div>Hello, World!</div>
-    `
-  );
-}
-// Only two <div>s will be present, not four.
-```
-
-**To always get a new node instance:**  
-Add a unique attribute (id, key, etc.), manually clone the node as seen below, or use [`htm/mini`](https://github.com/developit/htm#htmmini) which disables caching by default.
-
-```js
-const el = html`
-  <div>Hello, World!</div>
-`;
-const freshEl = el.cloneNode(true);
-```
-
-Refer to the [HTM documentation](https://github.com/developit/htm#caching) for more details on template caching and advanced usage.
 
 ## API
 
