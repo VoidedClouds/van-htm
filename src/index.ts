@@ -130,19 +130,15 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       ? children?.map((child: ChildDom) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
-    if (props) {
-      if (__CONTROL_FLOWS__) {
-        for (let [_, controlFlow] of objectEntries(controlFlows) as [string, ControlFlow][]) {
-          if (controlFlow.a.some((attribute) => objectHas(props, attribute))) {
-            return controlFlow(tag, props, decodedChildren);
-          }
+    if (__CONTROL_FLOWS__ && props) {
+      for (let [_, controlFlow] of objectEntries(controlFlows) as [string, ControlFlow][]) {
+        if (controlFlow.a.some((attribute) => objectHas(props, attribute))) {
+          return controlFlow(tag, props, decodedChildren);
         }
       }
-
-      return tag(props, ...decodedChildren);
     }
 
-    return tag(...decodedChildren);
+    return tag(props, ...decodedChildren);
   }
 
   let toReturn: VanHTM = { html: htm.bind(h) };
