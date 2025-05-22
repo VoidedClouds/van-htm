@@ -19,18 +19,18 @@
     },
     "./withDecoding": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/withDecoding/van-htm.module.js",
-      "require": "./dist/withDecoding/van-htm.cjs"
+      "import": "./withDecoding/van-htm.module.js",
+      "require": "./withDecoding/van-htm.cjs"
     },
     "./withDecoding-withoutControlFlows": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/withDecoding-withoutControlFlows/van-htm.module.js",
-      "require": "./dist/withDecoding-withoutControlFlows/van-htm.cjs"
+      "import": "./withDecoding-withoutControlFlows/van-htm.module.js",
+      "require": "./withDecoding-withoutControlFlows/van-htm.cjs"
     },
     "./withoutControlFlows": {
       "types": "./types/van-htm.d.ts",
-      "import": "./dist/withoutControlFlows/van-htm.module.js",
-      "require": "./dist/withoutControlFlows/van-htm.cjs"
+      "import": "./withoutControlFlows/van-htm.module.js",
+      "require": "./withoutControlFlows/van-htm.cjs"
     }
   },
   "scripts": {

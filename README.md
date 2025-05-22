@@ -13,10 +13,14 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/GggLYmx)
 
 ```js
-// <script src='https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.5.nomodule.min.js'></script>
-// <script src='https://cdn.jsdelivr.net/npm/vanjs-ext@0.6.2/dist/van-x.nomodule.min.js'></script>
+// Script tags for including van and vanX
+// <script src="https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-latest.nomodule.min.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/vanjs-ext/dist/van-x.nomodule.min.js"></script>
 
-// The imports below can be replaced by script tags like above
+// Script tags for including htm and vanHTM
+// <script src=="https://cdn.jsdelivr.net/npm/htm/mini/index.js"></script>
+// <script src=="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.min.js"></script>
+// The imports below can be replaced by the script tags above for htm and vanHTM
 import htm from 'htm/mini';
 import vanHTM from 'vanjs-htm';
 
@@ -217,6 +221,7 @@ van.add(document.getElementById('main-content'), container);
 
 ```js
 import { decode } from 'https://cdn.jsdelivr.net/npm/html-entities@2.6.0/+esm';
+import vanHTM from 'https://cdn.jsdelivr.net/npm/vanjs-htm/withDecoding/+esm';
 
 const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
 

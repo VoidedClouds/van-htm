@@ -36,11 +36,11 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
   let outDir = 'dist';
 
   if (controlFlows === false && htmlEntityDecoding === true) {
-    outDir = 'dist/withDecoding-withoutControlFlows';
+    outDir = 'withDecoding-withoutControlFlows';
   } else if (controlFlows === false) {
-    outDir = 'dist/withoutControlFlows';
+    outDir = 'withoutControlFlows';
   } else if (htmlEntityDecoding === true) {
-    outDir = 'dist/withDecoding';
+    outDir = 'withDecoding';
   }
 
   return {
@@ -48,7 +48,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
     clean: true,
     // dts: true,
     entry: {
-      [node ? 'van-htm' : dev ? 'dev.van-htm' : 'van-htm']: 'src/index.ts'
+      [node ? 'van-htm' : dev ? 'van-htm.dev' : 'van-htm']: 'src/index.ts'
     },
     outExtension({ format }) {
       return {
@@ -90,7 +90,7 @@ export default defineConfig([
   options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-withDecoding-withoutControlFlows
   options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-withoutControlFlows
 
-  // Node build (single)
+  // Node build
   options({ node: true, controlFlows: true, htmlEntityDecoding: false }), // server
   options({ node: true, controlFlows: true, htmlEntityDecoding: true }), // server-withDecoding
   options({ node: true, controlFlows: false, htmlEntityDecoding: true }), // server-withDecoding-withoutControlFlows

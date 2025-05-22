@@ -9,6 +9,9 @@ dist/
 build/
 out/
 types/
+withDecoding/
+withDecoding-withoutControlFlows/
+withoutControlFlows/
 
 # Test outputs
 coverage/
