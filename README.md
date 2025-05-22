@@ -234,7 +234,7 @@ van.add(document.body, el);
 ### Notes About [HTM](https://github.com/developit/htm)
 
 HTM caches template strings and the DOM node for each unique template string.  
-**Each iterative call** to `html\`...\`` with the same template string returns the **same DOM node instance**. If you append this node multiple times, the browser will move it rather than duplicate it, so only one instance will exist in the DOM.
+**Each iterative call** to `html\`...\`` with the same template string returns the **same DOM node instance**. If you append a node multiple times, the browser will move it rather than duplicate it, so only one instance will exist in the DOM.
 
 For example:
 
@@ -254,14 +254,15 @@ for (let i = 0; i < 2; i++) {
 // Only two <div>s will be present, not four.
 ```
 
-- **To always get a new node instance:**  
-  Use [`htm/mini`](https://github.com/developit/htm#htmmini) or manually clone the node:
-  ```js
-  const el = html`
-    <div>Hello, World!</div>
-  `;
-  const freshEl = el.cloneNode(true);
-  ```
+**To always get a new node instance:**  
+Add a unique attribute (id, key, etc.), manually clone the node as seen below, or use [`htm/mini`](https://github.com/developit/htm#htmmini) which disables caching by default.
+
+```js
+const el = html`
+  <div>Hello, World!</div>
+`;
+const freshEl = el.cloneNode(true);
+```
 
 Refer to the [HTM documentation](https://github.com/developit/htm#caching) for more details on template caching and advanced usage.
 
