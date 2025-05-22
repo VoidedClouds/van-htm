@@ -102,9 +102,8 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
         const portalId = `p-${portalIdCounter++}`;
         props['p:id'] = portalId;
 
-        // Create the portal content
-        const portalContent = tag(props, ...children);
-        van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContent, props, _undefined, false) : portalContent);
+        const portalContentFn = () => tag(props, ...children);
+        van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContentFn, props, _undefined, false) : portalContentFn());
 
         // Create and return a unique comment node as a placeholder
         return _document.createComment(portalId);

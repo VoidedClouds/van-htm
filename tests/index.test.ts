@@ -879,12 +879,13 @@ describe('html', function () {
         portalTarget.remove();
       });
 
-      it('shows and hides portaled content when toggling show:when', async () => {
+      it('shows and hides portaled content when toggling show:when and updates content in between', async () => {
         if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
 
+        const showPortalContent = van.state('PortaledShow');
         const visible = van.state(true);
         const el = html`
-          <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
+          <div portal:mount="#portal-target-combo" show:when=${visible}>${showPortalContent}</div>
         `;
         container.appendChild(el as Node);
 
@@ -894,9 +895,13 @@ describe('html', function () {
         await promisedTimeout();
         expect(portalTarget.textContent).toBe('');
 
+        showPortalContent.val = 'PortaledShowUpdated';
+        await promisedTimeout();
+        expect(portalTarget.textContent).toBe('');
+
         visible.val = true;
         await promisedTimeout();
-        expect(portalTarget.textContent).toBe('PortaledShow');
+        expect(portalTarget.textContent).toBe('PortaledShowUpdated');
 
         // Remove the portal and verify it is removed
         rmPortals!(container, portalTarget);
