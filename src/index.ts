@@ -13,8 +13,6 @@ export type VanHTM = {
   rmPortals: (parent: Node, portalTarget?: Element | string) => void;
 };
 
-type ControlFlowHandler = (fnOrNode: TagFunc<Element> | Function | Node, props: Props, children: ChildDom[], isTag?: boolean) => any;
-
 const vanHTM = (options: VanHTMOptions): VanHTM => {
   const { htm, van, vanX } = options;
   let decode: ((input: string) => string) | undefined;
@@ -42,12 +40,12 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     return value;
   };
 
-  const showHandler = (
+  const handleShow = (
     fnOrNode: TagFunc<Element> | Function | Node,
     props: Props,
     children: ChildDom[] | undefined,
     isTag: boolean = true
-  ) => {
+  ): Function => {
     let fallback = extractProperty(props, directives.s.f) ?? '';
     let when = extractProperty(props, directives.s.w);
 
@@ -73,16 +71,13 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const hasShowWhenProperty = (props) => objectHas(props, directives.s.w);
 
   let portalIdCounter = 0;
-  const controlFlows: Record<string, ControlFlowHandler> = {
-    // For
-    f: ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
+  const handleFor = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
       const items = extractProperty(props, directives.f.e);
       const listFn = () => vanX.list(tag(props), items, ...children);
 
-      return hasShowWhenProperty(props) ? showHandler(listFn, props, _undefined, false) : listFn();
-    }) as ControlFlowHandler,
-    // Portal
-    p: ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
+      return hasShowWhenProperty(props) ? handleShow(listFn, props, _undefined, false) : listFn();
+    },
+    handlePortal = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
       const mount = extractProperty(props, directives.p.m);
       // Determine the target element from the 'mount' prop
       let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
@@ -93,31 +88,19 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       props['p:id'] = portalId;
 
       const portalContentFn = () => tag(props, ...children);
-      van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContentFn, props, _undefined, false) : portalContentFn());
+      van.add(targetElement, hasShowWhenProperty(props) ? handleShow(portalContentFn, props, _undefined, false) : portalContentFn());
 
       // Create and return a unique comment node as a placeholder
       return _document.createComment(portalId);
-    }) as ControlFlowHandler,
-    // Show
-    s: showHandler as ControlFlowHandler
-  };
+    };
 
-  /**
-   * Creates a virtual DOM element using the specified type, props, and children.
-   * Handles decoding of string children and applies control flow logic if matching attributes are found.
-   *
-   * @param {string} type - The tag name or component type to create.
-   * @param {Object} [props] - The properties/attributes to apply to the element.
-   * @param {...ChildDom} children - The child elements or strings to include as children.
-   * @returns {Element | string} The created virtual DOM element or the result of a control flow handler.
-   */
   function h(
     this: [number, ...unknown[]],
     type: string,
     props?: Props & PropsWithKnownKeys<Element>,
     ...children: ChildDom[]
-  ): Element | string {
-    // disable cache
+  ): Comment | Element | Function | string {
+    // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
 
     const tag: TagFunc<Element> = van.tags[type];
@@ -125,13 +108,14 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       ? children?.map((child: ChildDom) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
+    // If attributes/properties have been passed to the element, check for Control Flow Directives
     if (props) {
       if (objectHas(props, directives.f.e)) {
-        return controlFlows.f(tag, props, decodedChildren);
+        return handleFor(tag, props, decodedChildren);
       } else if (objectHas(props, directives.p.m)) {
-        return controlFlows.p(tag, props, decodedChildren);
+        return handlePortal(tag, props, decodedChildren);
       } else if (objectHas(props, directives.s.w)) {
-        return controlFlows.s(tag, props, decodedChildren);
+        return handleShow(tag, props, decodedChildren);
       }
     }
 
