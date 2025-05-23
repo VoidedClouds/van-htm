@@ -2,7 +2,7 @@
   "name": "vanjs-htm",
   "author": "VoidedClouds",
   "license": "MIT",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "HTM with VanJS for JSX-like syntax in vanilla JavaScript using VanJS reactivity.",
   "files": [
     "dist",
