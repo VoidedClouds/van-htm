@@ -19,8 +19,8 @@
     },
     "./withDecoding": {
       "types": "./types/van-htm.d.ts",
-      "import": "./withDecoding/van-htm.module.js",
-      "require": "./withDecoding/van-htm.cjs"
+      "import": "./dist/withDecoding/van-htm.module.js",
+      "require": "./dist/withDecoding/van-htm.cjs"
     }
   },
   "scripts": {

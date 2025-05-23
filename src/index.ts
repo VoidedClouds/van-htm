@@ -1,7 +1,8 @@
-import htm from 'htm';
+import type htm from 'htm';
 import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
 
 export type VanHTMOptions = {
+  htm: typeof htm | any;
   van: Van | any;
   vanX: any;
   decode?: (input: string) => string;
@@ -15,7 +16,7 @@ export type VanHTM = {
 type ControlFlowHandler = (fnOrNode: TagFunc<Element> | Function | Node, props: Props, children: ChildDom[], isTag?: boolean) => any;
 
 const vanHTM = (options: VanHTMOptions): VanHTM => {
-  const { van, vanX } = options;
+  const { htm, van, vanX } = options;
   let decode: ((input: string) => string) | undefined;
 
   if (__HTML_ENTITY_DECODING__) {

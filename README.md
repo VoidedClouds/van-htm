@@ -18,11 +18,13 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 // <script src="https://cdn.jsdelivr.net/npm/vanjs-ext/dist/van-x.nomodule.min.js"></script>
 
 // Script tags for including htm and vanHTM
+// <script src=="https://cdn.jsdelivr.net/npm/htm/dist/htm.js"></script>
 // <script src=="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.js"></script>
 // The imports below can be replaced by the script tags above for htm and vanHTM
+import htm from 'htm';
 import vanHTM from 'vanjs-htm';
 
-const { html, rmPortals } = vanHTM({ van, vanX });
+const { html, rmPortals } = vanHTM({ htm, van, vanX });
 
 const el = html`
   <div>
@@ -217,9 +219,9 @@ van.add(document.getElementById('main-content'), container);
 
 ```js
 import { decode } from 'html-entities';
-import vanHTM from 'vanjs-htm/withDecoding';
+import vanHTM from 'vanjs-htm/withDecoding/';
 
-const { html, rmPortals } = vanHTM({ van, vanX, decode });
+const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
 
 // Example below
 const el = html`

@@ -35,7 +35,7 @@ function options({ dev, htmlEntityDecoding = false, node }: BundleOptions): Opti
   let outDir = 'dist';
 
   if (htmlEntityDecoding === true) {
-    outDir = 'withDecoding';
+    outDir = 'dist/withDecoding';
   }
 
   return {
@@ -50,7 +50,7 @@ function options({ dev, htmlEntityDecoding = false, node }: BundleOptions): Opti
         js: format === 'iife' ? `.js` : format === 'esm' ? `.module.js` : `.cjs`
       };
     },
-    external: ['alien-signals'],
+    external: [],
     format: node ? 'cjs' : ['esm', 'iife'],
     globalName: node ? undefined : 'vanHTM',
     outDir,
