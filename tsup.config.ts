@@ -6,11 +6,10 @@ interface BundleOptions {
   dev?: boolean;
   node?: boolean;
   // Code Paths
-  controlFlows?: boolean;
   htmlEntityDecoding?: boolean;
 }
 
-function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }: BundleOptions): Options {
+function options({ dev, htmlEntityDecoding = false, node }: BundleOptions): Options {
   const plugin: Plugin = {
     name: 'remove-console-warn',
     setup(build) {
@@ -35,11 +34,7 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
   // Determine output directory
   let outDir = 'dist';
 
-  if (controlFlows === false && htmlEntityDecoding === true) {
-    outDir = 'withDecoding-withoutControlFlows';
-  } else if (controlFlows === false) {
-    outDir = 'withoutControlFlows';
-  } else if (htmlEntityDecoding === true) {
+  if (htmlEntityDecoding === true) {
     outDir = 'withDecoding';
   }
 
@@ -65,7 +60,6 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
       __DEV__: dev ? 'true' : 'false',
       __TEST__: 'false',
       // Code Paths
-      __CONTROL_FLOWS__: controlFlows ? 'true' : 'false',
       __HTML_ENTITY_DECODING__: htmlEntityDecoding ? 'true' : 'false'
     },
     platform: node ? 'node' : 'browser',
@@ -79,20 +73,14 @@ function options({ controlFlows = true, dev, htmlEntityDecoding = false, node }:
 
 export default defineConfig([
   // Dev builds
-  options({ dev: true, controlFlows: true, htmlEntityDecoding: false }), // dev
-  options({ dev: true, controlFlows: true, htmlEntityDecoding: true }), // dev-withDecoding
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: true }), // dev-withDecoding-withoutControlFlows
-  options({ dev: true, controlFlows: false, htmlEntityDecoding: false }), // dev-withoutControlFlows
+  options({ dev: true, htmlEntityDecoding: false }), // dev
+  options({ dev: true, htmlEntityDecoding: true }), // dev-withDecoding
 
   // Prod builds
-  options({ dev: false, controlFlows: true, htmlEntityDecoding: false }), // prod
-  options({ dev: false, controlFlows: true, htmlEntityDecoding: true }), // prod-withDecoding
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: true }), // prod-withDecoding-withoutControlFlows
-  options({ dev: false, controlFlows: false, htmlEntityDecoding: false }), // prod-withoutControlFlows
+  options({ dev: false, htmlEntityDecoding: false }), // prod
+  options({ dev: false, htmlEntityDecoding: true }), // prod-withDecoding
 
   // Node build
-  options({ node: true, controlFlows: true, htmlEntityDecoding: false }), // server
-  options({ node: true, controlFlows: true, htmlEntityDecoding: true }), // server-withDecoding
-  options({ node: true, controlFlows: false, htmlEntityDecoding: true }), // server-withDecoding-withoutControlFlows
-  options({ node: true, controlFlows: false, htmlEntityDecoding: false }) // server-withoutControlFlows
+  options({ node: true, htmlEntityDecoding: false }), // server
+  options({ node: true, htmlEntityDecoding: true }) // server-withDecoding
 ]);

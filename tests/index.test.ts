@@ -113,8 +113,6 @@ describe('html', function () {
     describe('for directive', () => {
       describe('without reactivity', () => {
         it('renders a list of items', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items = vanX.reactive([1, 2, 3]);
           const el = html`
             <ul for:each=${items}>
@@ -133,8 +131,6 @@ describe('html', function () {
         });
 
         it('renders empty list', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items: any[] = vanX.reactive([]);
           const el = html`
             <ul for:each=${items}>
@@ -149,8 +145,6 @@ describe('html', function () {
         });
 
         it('renders list with objects', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items = vanX.reactive([{ name: 'A' }, { name: 'B' }]);
           const el = html`
             <ul for:each=${items}>
@@ -170,8 +164,6 @@ describe('html', function () {
 
       describe('with reactivity', () => {
         it('adds 3 items one at a time', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items = vanX.reactive<number[]>([]);
           const el = html`
             <ul for:each=${items}>
@@ -202,8 +194,6 @@ describe('html', function () {
         });
 
         it('removes 3 items one at a time', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items = vanX.reactive<number[]>([1, 2, 3]);
           const el = html`
             <ul for:each=${items}>
@@ -234,8 +224,6 @@ describe('html', function () {
         });
 
         it('adds and removes items reactively', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const items = vanX.reactive<number[]>([]);
           const el = html`
             <ul for:each=${items}>
@@ -286,8 +274,6 @@ describe('html', function () {
         });
 
         it('renders when condition is true', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const el = html`
             <div show:when=${true}>Visible</div>
           `;
@@ -296,8 +282,6 @@ describe('html', function () {
         });
 
         it('renders when condition is true from Function', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const el = html`
             <div show:when=${() => true}>Visible</div>
           `;
@@ -306,8 +290,6 @@ describe('html', function () {
         });
 
         it('renders fallback when condition is false', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const el = html`
             <div show:when=${false} show:fallback=${() => 'Hidden'}>Visible</div>
           `;
@@ -316,8 +298,6 @@ describe('html', function () {
         });
 
         it('renders nothing when condition is false and no fallback', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const el = html`
             <div show:when=${false}>Visible</div>
           `;
@@ -326,8 +306,6 @@ describe('html', function () {
         });
 
         it('renders fallback when show:when is 0', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return;
-
           const el = html`
             <div show:when=${0} show:fallback="Zero">Visible</div>
           `;
@@ -336,8 +314,6 @@ describe('html', function () {
         });
 
         it('renders fallback when show:when is empty string', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return;
-
           const el = html`
             <div show:when=${''} show:fallback="Empty">Visible</div>
           `;
@@ -346,8 +322,6 @@ describe('html', function () {
         });
 
         it('renders fallback when show:when is null', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return;
-
           const el = html`
             <div show:when=${null} show:fallback="Null">Visible</div>
           `;
@@ -356,8 +330,6 @@ describe('html', function () {
         });
 
         it('renders fallback when show:when is undefined', () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return;
-
           const el = html`
             <div show:when=${undefined} show:fallback="Undefined">Visible</div>
           `;
@@ -368,8 +340,6 @@ describe('html', function () {
 
       describe('with reactivity', () => {
         it('toggles between visible and fallback using van.state', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const visible = van.state(false);
           const el = html`
             <div show:when=${visible} show:fallback=${() => 'Hidden'}>Visible</div>
@@ -393,8 +363,6 @@ describe('html', function () {
         });
 
         it('renders nothing when toggled to false and no fallback', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const visible = van.state(true);
           const el = html`
             <div show:when=${visible}>Visible</div>
@@ -410,8 +378,6 @@ describe('html', function () {
         });
 
         it('renders fallback as static string when toggled', async () => {
-          if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
           const visible = van.state(false);
           const el = html`
             <div show:when=${visible} show:fallback="Static fallback">Visible</div>
@@ -449,8 +415,6 @@ describe('html', function () {
       });
 
       it('mounts content to a target element by element reference', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el = html`
           <div portal:mount=${portalTarget}>PortaledRef</div>
         `;
@@ -459,8 +423,6 @@ describe('html', function () {
       });
 
       it('mounts content to a target element by selector', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
         `;
@@ -470,8 +432,6 @@ describe('html', function () {
       });
 
       it('does not mount if target is null', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Expect a TypeError to be thrown when portal:mount is null
         expect(() => {
           const el = html`
@@ -482,8 +442,6 @@ describe('html', function () {
       });
 
       it('removes portaled elements from the portal target', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Mount a portaled element
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
@@ -493,14 +451,12 @@ describe('html', function () {
         // Confirm it's present
         expect(portalTarget.textContent).toBe('Portaled');
         // Remove portaled elements
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
         // Should be gone
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes portaled elements from the portal target by selector', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Mount a portaled element
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
@@ -510,14 +466,12 @@ describe('html', function () {
         // Confirm it's present
         expect(portalTarget.textContent).toBe('Portaled');
         // Remove portaled elements
-        rmPortals!(container, portalTargetSelector);
+        rmPortals(container, portalTargetSelector);
         // Should be gone
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes multiple portaled elements', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el1 = html`
           <div portal:mount="#portal-target">One</div>
         `;
@@ -530,14 +484,12 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('One');
         expect(portalTarget.textContent).toContain('Two');
 
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
 
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes multiple portaled elements by selector', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el1 = html`
           <div portal:mount="#portal-target">One</div>
         `;
@@ -550,14 +502,12 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('One');
         expect(portalTarget.textContent).toContain('Two');
 
-        rmPortals!(container, portalTargetSelector);
+        rmPortals(container, portalTargetSelector);
 
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes only portaled elements for the specified container and portalTarget', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Add two portaled elements from different containers
         const el1 = html`
           <div portal:mount="#portal-target">FromContainer</div>
@@ -572,15 +522,13 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('FromOtherContainer');
 
         // Remove only those belonging to `container`
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
 
         expect(portalTarget.textContent).not.toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
       });
 
       it('removes only portaled elements for the specified container and portalTarget by selector', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Add two portaled elements from different containers
         const el1 = html`
           <div portal:mount="#portal-target">FromContainer</div>
@@ -595,44 +543,36 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('FromOtherContainer');
 
         // Remove only those belonging to `container`
-        rmPortals!(container, portalTargetSelector);
+        rmPortals(container, portalTargetSelector);
 
         expect(portalTarget.textContent).not.toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
       });
 
       it('does not throw if there are no portaled elements', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // No portaled elements
-        expect(() => rmPortals!(container, portalTarget)).not.toThrow();
+        expect(() => rmPortals(container, portalTarget)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
 
       it('does not throw if there are no portaled elements by selector', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // No portaled elements
-        expect(() => rmPortals!(container, portalTargetSelector)).not.toThrow();
+        expect(() => rmPortals(container, portalTargetSelector)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes portaled elements from document.body if no portalTarget is given', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el = html`
           <div portal:mount="#portal-target">Portaled</div>
         `;
         container.appendChild(el as Node);
 
         expect(portalTarget.textContent).toBe('Portaled');
-        rmPortals!(container); // No portalTarget provided
+        rmPortals(container); // No portalTarget provided
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes multiple portaled elements from document.body if no portalTarget is given', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const el1 = html`
           <div portal:mount="#portal-target">One</div>
         `;
@@ -645,14 +585,12 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('One');
         expect(portalTarget.textContent).toContain('Two');
 
-        rmPortals!(container); // No portalTarget provided
+        rmPortals(container); // No portalTarget provided
 
         expect(portalTarget.textContent).toBe('');
       });
 
       it('removes only portaled elements for the specified container using document.body as default', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         // Add two portaled elements from different containers
         const el1 = html`
           <div portal:mount="#portal-target">FromContainer</div>
@@ -667,24 +605,20 @@ describe('html', function () {
         expect(portalTarget.textContent).toContain('FromOtherContainer');
 
         // Remove only those belonging to `container` (uses document.body)
-        rmPortals!(container);
+        rmPortals(container);
 
         expect(portalTarget.textContent).not.toContain('FromContainer');
         expect(portalTarget.textContent).toContain('FromOtherContainer');
       });
 
       it('does not throw if there are no portaled elements and no portalTarget is given', () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
-        expect(() => rmPortals!(container)).not.toThrow();
+        expect(() => rmPortals(container)).not.toThrow();
         expect(portalTarget.textContent).toBe('');
       });
     });
 
     describe('combining show with for', () => {
       it('renders fallback when show:when is false', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const items = vanX.reactive([1, 2]);
         const visible = van.state(false);
         const el = html`
@@ -705,8 +639,6 @@ describe('html', function () {
       });
 
       it('renders nothing when show:when is false and no fallback', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const items = vanX.reactive([1]);
         const visible = van.state(false);
         const el = html`
@@ -723,8 +655,6 @@ describe('html', function () {
       });
 
       it('shows and hides the entire list when toggling show:when', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const items = vanX.reactive([1, 2, 3]);
         const visible = van.state(true);
         const el = html`
@@ -749,8 +679,6 @@ describe('html', function () {
       });
 
       it('updates list after toggling visibility', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const items = vanX.reactive([1, 2]);
         const visible = van.state(true);
         const el = html`
@@ -814,8 +742,6 @@ describe('html', function () {
       });
 
       it('updates list while hidden in between toggling visibility', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const items = vanX.reactive([1, 2]);
         const visible = van.state(true);
         const el = html`
@@ -880,8 +806,6 @@ describe('html', function () {
       });
 
       it('shows and hides portaled content when toggling show:when and updates content in between', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const showPortalContent = van.state('PortaledShow');
         const visible = van.state(true);
         const el = html`
@@ -904,13 +828,11 @@ describe('html', function () {
         expect(portalTarget.textContent).toBe('PortaledShowUpdated');
 
         // Remove the portal and verify it is removed
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
         expect(portalTarget.textContent).toBe('');
       });
 
       it('renders fallback in portal when show:when is false', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const visible = van.state(false);
         const el = html`
           <div portal:mount="#portal-target-combo" show:when=${visible} show:fallback="HiddenPortal">PortaledShow</div>
@@ -932,13 +854,11 @@ describe('html', function () {
         expect(portalTarget.textContent).toBe('PortaledShow');
 
         // Remove the portal and verify it is removed
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
         expect(portalTarget.textContent).toBe('');
       });
 
       it('renders nothing in portal when show:when is false and no fallback', async () => {
-        if (!(globalThis as any).__CONTROL_FLOWS__) return this?.skip?.();
-
         const visible = van.state(false);
         const el = html`
           <div portal:mount="#portal-target-combo" show:when=${visible}>PortaledShow</div>
@@ -952,7 +872,7 @@ describe('html', function () {
         expect(portalTarget.textContent).toBe('PortaledShow');
 
         // Remove the portal and verify it is removed
-        rmPortals!(container, portalTarget);
+        rmPortals(container, portalTarget);
         expect(portalTarget.textContent).toBe('');
       });
     });

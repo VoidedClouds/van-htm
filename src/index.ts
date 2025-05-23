@@ -1,29 +1,22 @@
-import type htm from 'htm/mini';
+import htm from 'htm';
 import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
 
 export type VanHTMOptions = {
-  htm: typeof htm | any;
   van: Van | any;
-  vanX?: any;
+  vanX: any;
   decode?: (input: string) => string;
 };
 
 export type VanHTM = {
   html: (template: TemplateStringsArray, ...substitutions: any[]) => ChildDom;
-  rmPortals?: (parent: Node, portalTarget?: Element | string) => void;
+  rmPortals: (parent: Node, portalTarget?: Element | string) => void;
 };
 
 type ControlFlowHandler = (fnOrNode: TagFunc<Element> | Function | Node, props: Props, children: ChildDom[], isTag?: boolean) => any;
-type ControlFlow = ControlFlowHandler & { a: string[] };
 
 const vanHTM = (options: VanHTMOptions): VanHTM => {
-  const { htm, van } = options;
+  const { van, vanX } = options;
   let decode: ((input: string) => string) | undefined;
-  let vanX: any;
-
-  if (__CONTROL_FLOWS__) {
-    vanX = options?.vanX;
-  }
 
   if (__HTML_ENTITY_DECODING__) {
     decode = options?.decode;
@@ -79,39 +72,33 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const hasShowWhenProperty = (props) => objectHas(props, directives.s.w);
 
   let portalIdCounter = 0;
-  const controlFlows: Record<string, ControlFlow> = {
+  const controlFlows: Record<string, ControlFlowHandler> = {
     // For
-    f: objectAssign(
-      ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        const items = extractProperty(props, directives.f.e);
-        const listFn = () => vanX.list(tag(props), items, ...children);
+    f: ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
+      const items = extractProperty(props, directives.f.e);
+      const listFn = () => vanX.list(tag(props), items, ...children);
 
-        return hasShowWhenProperty(props) ? showHandler(listFn, props, _undefined, false) : listFn();
-      }) as ControlFlowHandler,
-      { a: [directives.f.e] }
-    ),
+      return hasShowWhenProperty(props) ? showHandler(listFn, props, _undefined, false) : listFn();
+    }) as ControlFlowHandler,
     // Portal
-    p: objectAssign(
-      ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-        const mount = extractProperty(props, directives.p.m);
-        // Determine the target element from the 'mount' prop
-        let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
-          ? _document.querySelector(mount)
-          : mount; // Otherwise, use mount directly if mount
+    p: ((tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
+      const mount = extractProperty(props, directives.p.m);
+      // Determine the target element from the 'mount' prop
+      let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
+        ? _document.querySelector(mount)
+        : mount; // Otherwise, use mount directly if mount
 
-        const portalId = `p-${portalIdCounter++}`;
-        props['p:id'] = portalId;
+      const portalId = `p-${portalIdCounter++}`;
+      props['p:id'] = portalId;
 
-        const portalContentFn = () => tag(props, ...children);
-        van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContentFn, props, _undefined, false) : portalContentFn());
+      const portalContentFn = () => tag(props, ...children);
+      van.add(targetElement, hasShowWhenProperty(props) ? showHandler(portalContentFn, props, _undefined, false) : portalContentFn());
 
-        // Create and return a unique comment node as a placeholder
-        return _document.createComment(portalId);
-      }) as ControlFlowHandler,
-      { a: [directives.p.m] }
-    ),
+      // Create and return a unique comment node as a placeholder
+      return _document.createComment(portalId);
+    }) as ControlFlowHandler,
     // Show
-    s: objectAssign(showHandler as ControlFlowHandler, { a: [directives.s.f, directives.s.w] })
+    s: showHandler as ControlFlowHandler
   };
 
   /**
@@ -123,34 +110,42 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
    * @param {...ChildDom} children - The child elements or strings to include as children.
    * @returns {Element | string} The created virtual DOM element or the result of a control flow handler.
    */
-  function h(type: string, props?: Props & PropsWithKnownKeys<Element>, ...children: ChildDom[]): Element | string {
-    let tag: TagFunc<Element> = van.tags[type];
+  function h(
+    this: [number, ...unknown[]],
+    type: string,
+    props?: Props & PropsWithKnownKeys<Element>,
+    ...children: ChildDom[]
+  ): Element | string {
+    // disable cache
+    this[0] = 3;
 
-    const decodedChildren = __HTML_ENTITY_DECODING__
+    const tag: TagFunc<Element> = van.tags[type];
+    const decodedChildren: ChildDom[] = __HTML_ENTITY_DECODING__
       ? children?.map((child: ChildDom) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
-    if (__CONTROL_FLOWS__ && props) {
-      for (let [_, controlFlow] of objectEntries(controlFlows) as [string, ControlFlow][]) {
-        if (controlFlow.a.some((attribute) => objectHas(props, attribute))) {
-          return controlFlow(tag, props, decodedChildren);
-        }
+    if (props) {
+      if (objectHas(props, directives.f.e)) {
+        return controlFlows.f(tag, props, decodedChildren);
+      } else if (objectHas(props, directives.p.m)) {
+        return controlFlows.p(tag, props, decodedChildren);
+      } else if (objectHas(props, directives.s.w)) {
+        return controlFlows.s(tag, props, decodedChildren);
       }
     }
 
     return tag(props, ...decodedChildren);
   }
 
-  let toReturn: VanHTM = { html: htm.bind(h) };
-
-  if (__CONTROL_FLOWS__) {
+  return {
+    html: htm.bind(h),
     /**
      * Removes portal elements from the DOM based on portal IDs found in comments.
      *
      * @param {Node} parent - The parent node to search for portal comment IDs.
      * @param {Element | string} [portalTarget] - Optional target element to search for portal elements. Defaults to document.body if not provided.
      */
-    toReturn.rmPortals = (parent: Node, portalTarget: Element | string = _document.body): void => {
+    rmPortals: (parent: Node, portalTarget: Element | string = _document.body): void => {
       let targetElem: Element | null = isTypeOfString(portalTarget) ? _document.querySelector(portalTarget) : portalTarget;
 
       if (!targetElem) return;
@@ -166,10 +161,8 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
 
       // Find and remove the portaled element with attribute p:id === portalId
       for (let portalId of result) targetElem.querySelector(`[p\\:id="${portalId}"]`)?.remove();
-    };
-  }
-
-  return toReturn;
+    }
+  } as VanHTM;
 };
 
 export default vanHTM;

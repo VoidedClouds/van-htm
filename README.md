@@ -18,13 +18,11 @@ A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https
 // <script src="https://cdn.jsdelivr.net/npm/vanjs-ext/dist/van-x.nomodule.min.js"></script>
 
 // Script tags for including htm and vanHTM
-// <script src=="https://cdn.jsdelivr.net/npm/htm/mini/index.js"></script>
-// <script src=="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.min.js"></script>
+// <script src=="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.js"></script>
 // The imports below can be replaced by the script tags above for htm and vanHTM
-import htm from 'htm/mini';
 import vanHTM from 'vanjs-htm';
 
-const { html, rmPortals } = vanHTM({ htm, van, vanX });
+const { html, rmPortals } = vanHTM({ van, vanX });
 
 const el = html`
   <div>
@@ -42,10 +40,8 @@ VanHTM provides several prebuilt bundles for browser usage, available via CDN (e
 
 **Build output structure:**
 
-- `dist/` contains builds with Controls Flows only.
-- `dist/withDecoding/` contains full-featured builds with Controls Flows and HTML Entity Decoding.
-- `dist/withDecoding-withoutControlFlows/` contains builds with HTML Entity Decoding and excludes Control Flows.
-- `dist/withoutControlFlows/` contains builds without Control Flows.
+- `dist/` default builds.
+- `dist/withDecoding/` builds that utilize HTML Entity Decoding (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
 
 Each directory contains:
 
@@ -220,10 +216,10 @@ van.add(document.getElementById('main-content'), container);
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/bNNyqjo)
 
 ```js
-import { decode } from 'https://cdn.jsdelivr.net/npm/html-entities@2.6.0/+esm';
-import vanHTM from 'https://cdn.jsdelivr.net/npm/vanjs-htm/withDecoding/+esm';
+import { decode } from 'html-entities';
+import vanHTM from 'vanjs-htm/withDecoding';
 
-const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
+const { html, rmPortals } = vanHTM({ van, vanX, decode });
 
 // Example below
 const el = html`
