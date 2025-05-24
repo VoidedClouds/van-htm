@@ -41,35 +41,22 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     s: { f: 'show:fallback' as const, w: 'show:when' as const }
   } as const;
 
-  type DirectiveKeys = {
-    'portal:mount': Element | string;
-    'show:fallback': ChildDom;
-    'show:when': boolean | (() => boolean) | State<boolean>;
-  };
-
-  type DirectiveKeysWithType<T extends object> = {
-    'for:each': T;
-  };
-
-  type PropsWithDirectives = Props &
-    PropsWithKnownKeys<Element> &
-    Partial<DirectiveKeys> & {
+  type PropsCombined = Props &
+    PropsWithKnownKeys<Element> & {
       'p:id'?: string;
     };
 
-  type PropsWithDirectivesWithType<T extends object> = PropsWithDirectives & Partial<DirectiveKeysWithType<T>>;
-
-  const extractProperty = <T>(object: PropsWithDirectives, key: string): T => {
+  const extractProperty = <T>(object: PropsCombined, key: string): T => {
     const value = object[key] as T;
     delete object[key];
     return value;
   };
 
-  const hasShowWhenProperty = (props: PropsWithDirectives): boolean => objectHasOwn(props, directives.s.w);
+  const hasShowWhenProperty = (props: PropsCombined): boolean => objectHasOwn(props, directives.s.w);
 
   const handleShow = (
     fnOrNode: TagFunc<Element> | (() => ChildDom) | ChildDom,
-    props: PropsWithDirectives,
+    props: PropsCombined,
     children: ChildDom[] | undefined,
     isTag: boolean = true
   ): ChildDom => {
@@ -90,17 +77,13 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   };
 
   let portalIdCounter: number = 0;
-  const handleFor = <T extends object>(
-      tag: TagFunc<Element>,
-      props: PropsWithDirectivesWithType<T>,
-      renderer: LoopItemRenderer<T>
-    ): ChildDom => {
+  const handleFor = <T extends object>(tag: TagFunc<Element>, props: PropsCombined, renderer: LoopItemRenderer<T>): ChildDom => {
       const items = extractProperty<T>(props, directives.f.e);
       const listFn = () => vanX.list(tag(props), items, renderer);
 
-      return hasShowWhenProperty(props) ? handleShow(listFn, props as PropsWithDirectives, _undefined, false) : listFn();
+      return hasShowWhenProperty(props) ? handleShow(listFn, props as PropsCombined, _undefined, false) : listFn();
     },
-    handlePortal = (tag: TagFunc<Element>, props: PropsWithDirectives, children: ChildDom[]): Comment => {
+    handlePortal = (tag: TagFunc<Element>, props: PropsCombined, children: ChildDom[]): Comment => {
       const mount = extractProperty<Element | string>(props, directives.p.m);
       const targetElement = isTypeOfString(mount) ? _document.querySelector(mount) : (mount as Element);
 
@@ -120,7 +103,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   function h<T extends object>(
     this: [number, ...unknown[]],
     type: string,
-    props?: PropsWithDirectivesWithType<T> | null | undefined,
+    props?: PropsCombined | null | undefined,
     ...children: (ChildDom | LoopItemRenderer<T>)[]
   ): ChildDom {
     // Disable caching of created elements https://github.com/developit/htm/#caching
