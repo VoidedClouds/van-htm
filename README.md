@@ -50,8 +50,8 @@ Each directory contains:
 - `van-htm.module.js` (ESM, minified)
 - `van-htm.js` (IIFE/global, minified)
 - `van-htm.cjs` (CJS, minified)
-- `dev.van-htm.module.js` (ESM, unminified)
-- `dev.van-htm.js` (IIFE/global, unminified)
+- `van-htm.dev.module.js` (ESM, unminified)
+- `van-htm.dev.js` (IIFE/global, unminified)
 
 ## Additional Usage Information
 

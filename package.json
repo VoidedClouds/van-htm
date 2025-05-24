@@ -27,6 +27,7 @@
     "build": "npm run build:js && npm run types",
     "build:js": "rimraf dist && tsup",
     "test": "vitest run --coverage tests",
+    "tsc": "tsc --noEmit -p tsconfig.build.json",
     "types": "rimraf types && tsc -p tsconfig.build.json && mv types/index.d.ts types/van-htm.d.ts"
   },
   "devDependencies": {

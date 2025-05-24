@@ -39,29 +39,36 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     s: { f: 'show:fallback' as const, w: 'show:when' as const }
   } as const;
 
-  type DirectiveKeys<T extends object> = {
-    'for:each': T;
+  type DirectiveKeys = {
     'portal:mount': Element | string;
     'show:fallback': ChildDom;
     'show:when': boolean | (() => boolean) | State<boolean>;
   };
 
-  type PropsWithDirectives<T extends object> = Props &
-    Partial<DirectiveKeys<T>> & {
+  type DirectiveKeysWithType<T extends object> = {
+    'for:each': T;
+  };
+
+  type PropsAndPropsWithKnownKeys = Props & PropsWithKnownKeys<Element>;
+
+  type PropsWithDirectives = PropsAndPropsWithKnownKeys &
+    Partial<DirectiveKeys> & {
       'p:id'?: string;
     };
 
-  const extractProperty = <T>(object: Props, key: string): T => {
+  type PropsWithDirectivesWithType<T extends object> = PropsWithDirectives & Partial<DirectiveKeysWithType<T>>;
+
+  const extractProperty = <T>(object: PropsAndPropsWithKnownKeys, key: string): T => {
     const value = object[key] as T;
     delete object[key];
     return value;
   };
 
-  const hasShowWhenProperty = (props: Props) => objectHas(props, directives.s.w);
+  const hasShowWhenProperty = (props: PropsWithDirectives) => objectHas(props, directives.s.w);
 
   const handleShow = (
     fnOrNode: TagFunc<Element> | Function | Node,
-    props: Props,
+    props: PropsWithDirectives,
     children: ChildDom[] | undefined,
     isTag: boolean = true
   ): ChildDom => {
@@ -89,13 +96,17 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   };
 
   let portalIdCounter = 0;
-  const handleFor = <T extends object>(tag: TagFunc<Element>, props: Props, children: LoopItemRenderer<T>[]): ChildDom => {
+  const handleFor = <T extends object>(
+      tag: TagFunc<Element>,
+      props: PropsWithDirectivesWithType<T>,
+      renderer: LoopItemRenderer<T>
+    ): ChildDom => {
       const items = extractProperty<T>(props, directives.f.e);
-      const listFn = () => vanX.list(tag(props), items, children[0]);
+      const listFn = () => vanX.list(tag(props), items, renderer);
 
-      return hasShowWhenProperty(props) ? handleShow(listFn, props, _undefined, false) : listFn();
+      return hasShowWhenProperty(props) ? handleShow(listFn, props as PropsWithDirectives, _undefined, false) : listFn();
     },
-    handlePortal = (tag: TagFunc<Element>, props: Props, children: ChildDom[]): Comment => {
+    handlePortal = (tag: TagFunc<Element>, props: PropsWithDirectives, children: ChildDom[]): Comment => {
       const mount = extractProperty<Element | string>(props, directives.p.m);
       // Determine the target element from the 'mount' prop
       let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
@@ -118,21 +129,21 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   function h<T extends object>(
     this: [number, ...unknown[]],
     type: string,
-    props?: Props & PropsWithDirectives<T> & PropsWithKnownKeys<Element>,
-    ...children: (ChildDom | LoopItemRenderer<object>)[]
+    props?: PropsWithDirectivesWithType<T> | null | undefined,
+    ...children: (ChildDom | LoopItemRenderer<T>)[]
   ): ChildDom {
     // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
 
     const tag: TagFunc<Element> = van.tags[type];
-    const decodedChildren: (ChildDom | LoopItemRenderer<object>)[] = __HTML_ENTITY_DECODING__
+    const decodedChildren: (ChildDom | LoopItemRenderer<T>)[] = __HTML_ENTITY_DECODING__
       ? children?.map((child) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
     // If attributes/properties have been passed to the element, check for Control Flow Directives
     if (props) {
       if (objectHas(props, directives.f.e)) {
-        return handleFor(tag, props, decodedChildren as LoopItemRenderer<object>[]);
+        return handleFor(tag, props, decodedChildren[0] as LoopItemRenderer<T>);
       } else if (objectHas(props, directives.p.m)) {
         return handlePortal(tag, props, decodedChildren as ChildDom[]);
       } else if (objectHas(props, directives.s.w)) {
@@ -168,7 +179,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       // Find and remove the portaled element with attribute p:id === portalId
       for (const portalId of result) targetElem.querySelector(`[p\\:id="${portalId}"]`)?.remove();
     }
-  } as VanHTM;
+  };
 };
 
 export default vanHTM;
