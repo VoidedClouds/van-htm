@@ -31,7 +31,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const _document = document;
   const _undefined = undefined;
 
-  const objectHas = Object.hasOwn;
+  const objectHasOwn = Object.hasOwn;
   const isFunctionInstance = (object: unknown): object is Function => object instanceof Function;
   const isTypeOfString = (value: unknown): value is string => typeof value === 'string';
 
@@ -65,7 +65,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     return value;
   };
 
-  const hasShowWhenProperty = (props: PropsWithDirectives): boolean => objectHas(props, directives.s.w);
+  const hasShowWhenProperty = (props: PropsWithDirectives): boolean => objectHasOwn(props, directives.s.w);
 
   const handleShow = (
     fnOrNode: TagFunc<Element> | (() => ChildDom) | ChildDom,
@@ -77,12 +77,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     let when = extractProperty<boolean | (() => boolean) | State<boolean>>(props, directives.s.w);
 
     return () => {
-      let condition =
-        (when as State<boolean>)?.val !== undefined // Check for .val (state)
-          ? (when as State<boolean>).val
-          : isFunctionInstance(when)
-          ? when()
-          : when; // Otherwise, execute if it's a function or use directly
+      let condition = (when as State<boolean>)?.val !== undefined ? (when as State<boolean>).val : isFunctionInstance(when) ? when() : when;
 
       return condition
         ? isTag
@@ -109,10 +104,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     },
     handlePortal = (tag: TagFunc<Element>, props: PropsWithDirectives, children: ChildDom[]): Comment => {
       const mount = extractProperty<Element | string>(props, directives.p.m);
-      // Determine the target element from the 'mount' prop
-      let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
-        ? _document.querySelector(mount)
-        : (mount as Element); // Otherwise, use mount directly if mount
+      const targetElement = isTypeOfString(mount) ? _document.querySelector(mount) : (mount as Element);
 
       const portalId = `p-${portalIdCounter++}`;
       props['p:id'] = portalId;
@@ -136,18 +128,18 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
 
-    const tag: TagFunc<Element> = van.tags[type];
-    const decodedChildren: (ChildDom | LoopItemRenderer<T>)[] = __HTML_ENTITY_DECODING__
+    const tag = van.tags[type];
+    const decodedChildren = __HTML_ENTITY_DECODING__
       ? children?.map((child) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
     // If attributes/properties have been passed to the element, check for Control Flow Directives
     if (props) {
-      if (objectHas(props, directives.f.e)) {
+      if (objectHasOwn(props, directives.f.e)) {
         return handleFor(tag, props, decodedChildren[0] as LoopItemRenderer<T>);
-      } else if (objectHas(props, directives.p.m)) {
+      } else if (objectHasOwn(props, directives.p.m)) {
         return handlePortal(tag, props, decodedChildren as ChildDom[]);
-      } else if (objectHas(props, directives.s.w)) {
+      } else if (objectHasOwn(props, directives.s.w)) {
         return handleShow(tag, props, decodedChildren as ChildDom[]);
       }
     }
@@ -164,7 +156,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
      * @param {Element | string} [portalTarget] - Optional target element to search for portal elements. Defaults to document.body if not provided.
      */
     rmPortals: (parent: Node, portalTarget: Element | string = _document.body): void => {
-      let targetElem: Element | null = isTypeOfString(portalTarget) ? _document.querySelector(portalTarget) : portalTarget;
+      let targetElem = isTypeOfString(portalTarget) ? _document.querySelector(portalTarget) : portalTarget;
 
       if (!targetElem) return;
 
