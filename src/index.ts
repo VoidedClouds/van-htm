@@ -4,21 +4,76 @@ import type { KeyType, ValueType, list } from 'vanjs-ext';
 
 export type { ChildDom, Van, htm, list };
 
+/**
+ * Configuration options for initializing a VanHTM instance.
+ */
 export type VanHTMOptions = {
+  /** The htm template literal parser instance. */
   htm: typeof htm;
+  /**
+   * A VanJS instance (or a compatible subset) providing `add` and `tags` functionalities.
+   */
   van: Pick<Van, 'add' | 'tags'>;
+  /**
+   * An object containing VanJS extensions.
+   * `list` from `vanjs-ext` is required for the `for:each` directive.
+   */
   vanX: {
     list: typeof list;
   };
+  /**
+   * Optional HTML entity decoder function.
+   * This function is applied to static text content within templates.
+   * It is required if using a build of `van-htm` that has decoding enabled (e.g., `/withDecoding`).
+   * The function should take a string with HTML entities (e.g., '&amp;') and return a string with decoded characters (e.g., '&').
+   * @param input The string containing HTML entities.
+   * @returns The string with HTML entities decoded.
+   */
   decode?: (input: string) => string;
 };
 
+/**
+ * Represents a VanHTM instance, providing template literal functionality and portal management.
+ */
 export type VanHTM = {
+  /**
+   * An htm-compatible template literal tag function.
+   * Parses HTML-like template strings and produces VanJS DOM elements or ChildDom.
+   * Supports special directives like `for:each`, `show:when`, `show:fallback`, and `portal:mount`.
+   * @param template The template string array.
+   * @param substitutions Values to be interpolated into the template.
+   * @returns The DOM element(s) or ChildDom generated from the template.
+   */
   html: (template: TemplateStringsArray, ...substitutions: unknown[]) => ChildDom;
+  /**
+   * Removes portal elements that were previously rendered by this VanHTM instance.
+   * It searches for comment placeholders within the `parent` node and removes
+   * corresponding elements from the `portalTarget` (or document.body by default)
+   * using querySelector.
+   * @param parent The parent Node where the portal placeholder comments were rendered.
+   * @param portalTarget Optional. The Element or CSS selector string for the container
+   *                     where portal content was mounted. Defaults to `document.body`.
+   */
   rmPortals: (parent: Node, portalTarget?: Element | string) => void;
 };
 
-export type LoopItemRenderer<T extends object> = (v: State<ValueType<T>>, deleter: () => void, k: KeyType<T>) => Node;
+/**
+ * The itemFunc that the `for:each` directive uses with vanX.list.
+ * Refer to https://vanjs.org/x for more details.
+ * The function `((v, deleter, k) => Node)` is used to generate the UI element (or rarely, text node) for each list item.
+ * @template T The type of the items in the list <typeof items> (items must be vanX.reactive).
+ * @param v A State object corresponding to each list item.
+ * You can directly use it as a State-based property / child node, read its value for building the UI element, and/or set its value in some event handlers.
+ * @param deleter A function (() => void) that can be used in the event handler to delete the entire item.
+ * Typically the deleter function can be used as the onclick handler of a deletion button.
+ * @param k (Requires VanX 0.2.0 or later) the key of the corresponding list item, which is the index if items is an Array or the property key if items is a plain object.
+ * @returns The Node or DOM element to be rendered for the item.
+ */
+export type ListItemFunction<T extends object> = (v: State<ValueType<T>>, deleter: () => void, k: KeyType<T>) => Node;
+type PropsCombined = Props &
+  PropsWithKnownKeys<Element> & {
+    'p:id'?: string;
+  };
 
 /**
  * Creates a VanHTM instance that provides HTML template literal functionality with VanJS integration.
@@ -77,11 +132,6 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     s: { f: 'show:fallback' as const, w: 'show:when' as const }
   } as const;
 
-  type PropsCombined = Props &
-    PropsWithKnownKeys<Element> & {
-      'p:id'?: string;
-    };
-
   const extractProperty = <T>(object: PropsCombined, key: string): T => {
     const value = object[key] as T;
     delete object[key];
@@ -113,9 +163,9 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   };
 
   let portalIdCounter: number = 0;
-  const handleFor = <T extends object>(tag: TagFunc<Element>, props: PropsCombined, renderer: LoopItemRenderer<T>): ChildDom => {
+  const handleFor = <T extends object>(tag: TagFunc<Element>, props: PropsCombined, itemFunc: ListItemFunction<T>): ChildDom => {
       const items = extractProperty<T>(props, directives.f.e);
-      const listFn = () => vanX.list(tag(props), items, renderer);
+      const listFn = () => vanX.list(tag(props), items, itemFunc);
 
       return hasShowWhenProperty(props) ? handleShow(listFn, props as PropsCombined, _undefined, false) : listFn();
     },
@@ -140,7 +190,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     this: [number, ...unknown[]],
     type: string,
     props?: PropsCombined | null | undefined,
-    ...children: (ChildDom | LoopItemRenderer<T>)[]
+    ...children: (ChildDom | ListItemFunction<T>)[]
   ): ChildDom {
     // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
@@ -153,7 +203,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     // If attributes/properties have been passed to the element, check for Control Flow Directives
     if (props) {
       if (objectHasOwn(props, directives.f.e)) {
-        return handleFor(tag, props, decodedChildren[0] as LoopItemRenderer<T>);
+        return handleFor(tag, props, decodedChildren[0] as ListItemFunction<T>);
       } else if (objectHasOwn(props, directives.p.m)) {
         return handlePortal(tag, props, decodedChildren as ChildDom[]);
       } else if (objectHasOwn(props, directives.s.w)) {
@@ -166,12 +216,6 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
 
   return {
     html: htm.bind(h),
-    /**
-     * Removes portal elements from the DOM based on portal IDs found in comments.
-     *
-     * @param {Node} parent - The parent node to search for portal comment IDs.
-     * @param {Element | string} [portalTarget] - Optional target element to search for portal elements. Defaults to document.body if not provided.
-     */
     rmPortals: (parent: Node, portalTarget: Element | string = _document.body): void => {
       let targetElem = isTypeOfString(portalTarget) ? _document.querySelector(portalTarget) : portalTarget;
 
