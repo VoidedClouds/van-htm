@@ -31,9 +31,9 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const _document = document;
   const _undefined = undefined;
 
-  const objectHasOwn = Object.hasOwn;
   const isFunctionInstance = (object: unknown): object is Function => object instanceof Function;
   const isTypeOfString = (value: unknown): value is string => typeof value === 'string';
+  const objectHasOwn = Object.hasOwn;
 
   const directives = {
     f: { e: 'for:each' as const },
