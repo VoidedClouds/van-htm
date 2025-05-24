@@ -20,6 +20,42 @@ export type VanHTM = {
 
 export type LoopItemRenderer<T extends object> = (v: State<ValueType<T>>, deleter: () => void, k: KeyType<T>) => Node;
 
+/**
+ * Creates a VanHTM instance that provides HTML template literal functionality with VanJS integration.
+ *
+ * @param options - Configuration object for VanHTM
+ * @param options.htm - The htm template literal parser
+ * @param options.van - VanJS instance with 'add' and 'tags' methods
+ * @param options.vanX - VanJS extensions object containing the 'list' function
+ * @param options.decode - Optional HTML entity decoder function for template content, required in builds `withDecoding`
+ *
+ * @returns VanHTM instance with html template function and portal management (rmPortals)
+ *
+ * @example
+ * ```typescript
+ * import htm from 'htm';
+ * import van from 'vanjs-core';
+ * import { list, reactive } from 'vanjs-ext';
+ * import vanHTM from 'van-htm';
+ *
+ * const { html } = vanHTM({ htm, van, vanX: { list } });
+ *
+ * // Basic usage
+ * const element = html`<div>Hello World</div>`;
+ *
+ * // With conditional rendering
+ * const conditional = html`<div show:when=${true}>Visible</div>`;
+ *
+ * // With loops
+ * const items = reactive([1, 2, 3]);
+ * const list = html`<ul for:each=${items}>${(v) => html`<li>${v}</li>`}</ul>`;
+ *
+ * // With portals
+ * const portal = html`<div portal:mount="body">Portaled content</div>`;
+ *
+ * van.add(document.body, element, conditional, list);
+ * ```
+ */
 const vanHTM = (options: VanHTMOptions): VanHTM => {
   const { htm, van, vanX } = options;
   let decode: ((input: string) => string) | undefined;
