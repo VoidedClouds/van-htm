@@ -1,6 +1,8 @@
 import type htm from 'htm';
 import type { ChildDom, Props, PropsWithKnownKeys, State, TagFunc, Van } from 'vanjs-core';
-import type { list, KeyType, ValueType } from 'vanjs-ext';
+import type { KeyType, ValueType, list } from 'vanjs-ext';
+
+export type { ChildDom, Van, htm, list };
 
 export type VanHTMOptions = {
   htm: typeof htm;
