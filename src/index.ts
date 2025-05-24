@@ -82,9 +82,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       return condition
         ? isTag
           ? (fnOrNode as TagFunc<Element>)(props, ...(children as ChildDom[]))
-          : isFunctionInstance(fnOrNode)
-          ? (fnOrNode as Function)()
-          : fnOrNode
+          : (fnOrNode as Function)()
         : isFunctionInstance(fallback)
         ? fallback()
         : fallback;
