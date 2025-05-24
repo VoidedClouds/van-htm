@@ -49,25 +49,24 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     'for:each': T;
   };
 
-  type PropsAndPropsWithKnownKeys = Props & PropsWithKnownKeys<Element>;
-
-  type PropsWithDirectives = PropsAndPropsWithKnownKeys &
+  type PropsWithDirectives = Props &
+    PropsWithKnownKeys<Element> &
     Partial<DirectiveKeys> & {
       'p:id'?: string;
     };
 
   type PropsWithDirectivesWithType<T extends object> = PropsWithDirectives & Partial<DirectiveKeysWithType<T>>;
 
-  const extractProperty = <T>(object: PropsAndPropsWithKnownKeys, key: string): T => {
+  const extractProperty = <T>(object: PropsWithDirectives, key: string): T => {
     const value = object[key] as T;
     delete object[key];
     return value;
   };
 
-  const hasShowWhenProperty = (props: PropsWithDirectives) => objectHas(props, directives.s.w);
+  const hasShowWhenProperty = (props: PropsWithDirectives): boolean => objectHas(props, directives.s.w);
 
   const handleShow = (
-    fnOrNode: TagFunc<Element> | Function | Node,
+    fnOrNode: TagFunc<Element> | (() => ChildDom) | ChildDom,
     props: PropsWithDirectives,
     children: ChildDom[] | undefined,
     isTag: boolean = true
@@ -95,7 +94,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     };
   };
 
-  let portalIdCounter = 0;
+  let portalIdCounter: number = 0;
   const handleFor = <T extends object>(
       tag: TagFunc<Element>,
       props: PropsWithDirectivesWithType<T>,
