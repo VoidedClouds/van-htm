@@ -1,17 +1,22 @@
 import type htm from 'htm';
-import type { ChildDom, Props, PropsWithKnownKeys, TagFunc, Van } from 'vanjs-core';
+import type { ChildDom, Props, PropsWithKnownKeys, State, TagFunc, Van } from 'vanjs-core';
+import type { list, KeyType, ValueType } from 'vanjs-ext';
 
 export type VanHTMOptions = {
-  htm: typeof htm | any;
-  van: Van | any;
-  vanX: any;
+  htm: typeof htm;
+  van: Pick<Van, 'add' | 'tags'>;
+  vanX: {
+    list: typeof list;
+  };
   decode?: (input: string) => string;
 };
 
 export type VanHTM = {
-  html: (template: TemplateStringsArray, ...substitutions: any[]) => ChildDom;
+  html: (template: TemplateStringsArray, ...substitutions: unknown[]) => ChildDom;
   rmPortals: (parent: Node, portalTarget?: Element | string) => void;
 };
+
+export type LoopItemRenderer<T extends object> = (v: State<ValueType<T>>, deleter: () => void, k: KeyType<T>) => Node;
 
 const vanHTM = (options: VanHTMOptions): VanHTM => {
   const { htm, van, vanX } = options;
@@ -24,35 +29,49 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const _document = document;
   const _undefined = undefined;
 
-  const { assign: objectAssign, entries: objectEntries, hasOwn: objectHas } = Object;
-  const isFunctionInstance = (object) => object instanceof Function;
-  const isTypeOfString = (value) => typeof value === 'string';
+  const objectHas = Object.hasOwn;
+  const isFunctionInstance = (object: unknown): object is Function => object instanceof Function;
+  const isTypeOfString = (value: unknown): value is string => typeof value === 'string';
 
   const directives = {
-    f: { e: 'for:each' },
-    p: { m: 'portal:mount' },
-    s: { f: 'show:fallback', w: 'show:when' }
+    f: { e: 'for:each' as const },
+    p: { m: 'portal:mount' as const },
+    s: { f: 'show:fallback' as const, w: 'show:when' as const }
+  } as const;
+
+  type DirectiveKeys<T extends object> = {
+    'for:each': T;
+    'portal:mount': Element | string;
+    'show:fallback': ChildDom;
+    'show:when': boolean | (() => boolean) | State<boolean>;
   };
 
-  const extractProperty = (object: Props, key: string): any => {
-    const value = object[key];
+  type PropsWithDirectives<T extends object> = Props &
+    Partial<DirectiveKeys<T>> & {
+      'p:id'?: string;
+    };
+
+  const extractProperty = <T>(object: Props, key: string): T => {
+    const value = object[key] as T;
     delete object[key];
     return value;
   };
+
+  const hasShowWhenProperty = (props: Props) => objectHas(props, directives.s.w);
 
   const handleShow = (
     fnOrNode: TagFunc<Element> | Function | Node,
     props: Props,
     children: ChildDom[] | undefined,
     isTag: boolean = true
-  ): Function => {
-    let fallback = extractProperty(props, directives.s.f) ?? '';
-    let when = extractProperty(props, directives.s.w);
+  ): ChildDom => {
+    let fallback = extractProperty<ChildDom>(props, directives.s.f) ?? '';
+    let when = extractProperty<boolean | (() => boolean) | State<boolean>>(props, directives.s.w);
 
     return () => {
       let condition =
-        when?.val !== undefined // Check for .val (state)
-          ? when.val
+        (when as State<boolean>)?.val !== undefined // Check for .val (state)
+          ? (when as State<boolean>).val
           : isFunctionInstance(when)
           ? when()
           : when; // Otherwise, execute if it's a function or use directly
@@ -68,58 +87,60 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
         : fallback;
     };
   };
-  const hasShowWhenProperty = (props) => objectHas(props, directives.s.w);
 
   let portalIdCounter = 0;
-  const handleFor = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-      const items = extractProperty(props, directives.f.e);
-      const listFn = () => vanX.list(tag(props), items, ...children);
+  const handleFor = <T extends object>(tag: TagFunc<Element>, props: Props, children: LoopItemRenderer<T>[]): ChildDom => {
+      const items = extractProperty<T>(props, directives.f.e);
+      const listFn = () => vanX.list(tag(props), items, children[0]);
 
       return hasShowWhenProperty(props) ? handleShow(listFn, props, _undefined, false) : listFn();
     },
-    handlePortal = (tag: TagFunc<Element>, props: Props, children: ChildDom[]) => {
-      const mount = extractProperty(props, directives.p.m);
+    handlePortal = (tag: TagFunc<Element>, props: Props, children: ChildDom[]): Comment => {
+      const mount = extractProperty<Element | string>(props, directives.p.m);
       // Determine the target element from the 'mount' prop
       let targetElement: Element | null = isTypeOfString(mount) // If mount is a string, assume it's a CSS selector
         ? _document.querySelector(mount)
-        : mount; // Otherwise, use mount directly if mount
+        : (mount as Element); // Otherwise, use mount directly if mount
 
       const portalId = `p-${portalIdCounter++}`;
       props['p:id'] = portalId;
 
       const portalContentFn = () => tag(props, ...children);
-      van.add(targetElement, hasShowWhenProperty(props) ? handleShow(portalContentFn, props, _undefined, false) : portalContentFn());
+      van.add(
+        targetElement as Element,
+        hasShowWhenProperty(props) ? handleShow(portalContentFn, props, _undefined, false) : portalContentFn()
+      );
 
       // Create and return a unique comment node as a placeholder
       return _document.createComment(portalId);
     };
 
-  function h(
+  function h<T extends object>(
     this: [number, ...unknown[]],
     type: string,
-    props?: Props & PropsWithKnownKeys<Element>,
-    ...children: ChildDom[]
-  ): Comment | Element | Function | string {
+    props?: Props & PropsWithDirectives<T> & PropsWithKnownKeys<Element>,
+    ...children: (ChildDom | LoopItemRenderer<object>)[]
+  ): ChildDom {
     // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
 
     const tag: TagFunc<Element> = van.tags[type];
-    const decodedChildren: ChildDom[] = __HTML_ENTITY_DECODING__
-      ? children?.map((child: ChildDom) => (isTypeOfString(child) ? decode!(child) : child))
+    const decodedChildren: (ChildDom | LoopItemRenderer<object>)[] = __HTML_ENTITY_DECODING__
+      ? children?.map((child) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
 
     // If attributes/properties have been passed to the element, check for Control Flow Directives
     if (props) {
       if (objectHas(props, directives.f.e)) {
-        return handleFor(tag, props, decodedChildren);
+        return handleFor(tag, props, decodedChildren as LoopItemRenderer<object>[]);
       } else if (objectHas(props, directives.p.m)) {
-        return handlePortal(tag, props, decodedChildren);
+        return handlePortal(tag, props, decodedChildren as ChildDom[]);
       } else if (objectHas(props, directives.s.w)) {
-        return handleShow(tag, props, decodedChildren);
+        return handleShow(tag, props, decodedChildren as ChildDom[]);
       }
     }
 
-    return tag(props, ...decodedChildren);
+    return tag(props, ...(decodedChildren as ChildDom[]));
   }
 
   return {
@@ -145,7 +166,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       }
 
       // Find and remove the portaled element with attribute p:id === portalId
-      for (let portalId of result) targetElem.querySelector(`[p\\:id="${portalId}"]`)?.remove();
+      for (const portalId of result) targetElem.querySelector(`[p\\:id="${portalId}"]`)?.remove();
     }
   } as VanHTM;
 };
