@@ -81,7 +81,7 @@ van.add(
 );
 ```
 
-See [VanX docs: Reactive List](https://vanjs.org/x#reactive-list) for more details on the `itemFunction` signature.
+See [VanX docs: Reactive List](https://vanjs.org/x#reactive-list) for more details on the `itemFunc` parameter.
 
 #### show:when
 
