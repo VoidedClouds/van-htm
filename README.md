@@ -1,12 +1,15 @@
 # VanHTM
 
-A flexible [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and HTML entity decoding. [Here's a sample](https://codepen.io/VoidedClouds/pen/myygzNQ) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
+A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and optional HTML entity decoding.
+
+[Here's a sample](https://codepen.io/VoidedClouds/pen/myygzNQ) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
 
 ## Features
 
 - **Tagged Template HTML**: Write JSX-like templates in plain JavaScript using [HTM](https://github.com/developit/htm) with [VanJS](https://vanjs.org), no build step required.
-- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering (requires [VanX](https://vanjs.org/x)). You can also combine `show:when` with `for:each` and `portal:mount` to [conditionally render lists and portals](#combining-showwhen-with-foreach-and-portalmount).
+- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering. You can also combine `show:when` with `for:each` and `portal:mount` to [conditionally render lists and portals](#combining-showwhen-with-foreach-and-portalmount).
 - **[Optional HTML Entity Decoding](#optional-html-entity-decoding)**: Decode HTML entities in string children (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
+- **TypeScript Support**: VanHTM is written in TypeScript and provides full type definitions.
 
 ## Usage
 
@@ -47,8 +50,8 @@ VanHTM provides several prebuilt bundles for browser usage, available via CDN (e
 
 Each directory contains:
 
-- `van-htm.module.js` (ESM, minified)
-- `van-htm.js` (IIFE/global, minified)
+- `van-htm.module.js` (ESM, minified, 684B gzipped)
+- `van-htm.js` (IIFE/global, minified, 690B gzipped)
 - `van-htm.cjs` (CJS, minified)
 - `van-htm.dev.module.js` (ESM, unminified)
 - `van-htm.dev.js` (IIFE/global, unminified)
@@ -56,8 +59,6 @@ Each directory contains:
 ## Additional Usage Information
 
 ### Control Flow Directives
-
-> **Note:** Control Flow Directives require [VanX](https://vanjs.org/x).
 
 #### for:each
 
@@ -123,6 +124,8 @@ Renders the element into a different part of the DOM (a "portal"). The `portal:m
 - A CSS selector string (e.g., `#modal-root`)
 
 > **Note:** For `rmPortals` to work correctly, portals should only be the direct child of their parent element. Nesting portals deeper will prevent `rmPortals` from removing them properly.
+
+> **Implementation Detail:** VanHTM automatically adds a `p:id` attribute to portaled elements for internal tracking. This attribute is used by `rmPortals` to identify and remove the correct portal elements. You should not manually set or modify this attribute.
 
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/GggLYdB)
 
@@ -219,7 +222,7 @@ van.add(document.getElementById('main-content'), container);
 
 ```js
 import { decode } from 'html-entities';
-import vanHTM from 'vanjs-htm/withDecoding/';
+import vanHTM from 'vanjs-htm/withDecoding';
 
 const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
 
@@ -240,8 +243,8 @@ van.add(document.body, el);
 
 - `htm`: Required in all builds. The HTM instance.
 - `van`: Required in all builds. The VanJS instance.
-- `vanX`: Required in builds that include Control Flows. The VanJS Extension instance.
-- `decode`: Required in builds that include HTML Entity Decoding. The decode method from a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.
+- `vanX`: Required in all builds. The VanJS Extension instance.
+- `decode`: Required in builds that include HTML Entity Decoding (`vanjs-htm/withDecoding`). The decode method from a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.
 
 Returns:
 
