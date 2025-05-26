@@ -164,8 +164,32 @@ van.add(document.body, containerWithPortal);
 #### Removing Portaled Elements
 
 ```js
-// Removes all portaled elements created from `parentContainer` that are mounted in `portalTarget` (or `document.body`).
+// Removes all portaled elements created from `parentContainer` that are mounted in `portalTarget`.
+// If no portalTarget is specified, it defaults to document.body.
 rmPortals(parentContainer, portalTarget?);
+```
+
+**Parameters:**
+
+- `parentContainer` (Node): The container element that contains the portal placeholder comments
+- `portalTarget` (Element | string, optional): The target where portal content was mounted. Can be:
+  - A DOM Element
+  - A CSS selector string (e.g., `'#modal-root'`, `'.portal-container'`)
+  - If omitted, defaults to `document.body`
+
+**Examples:**
+
+```js
+// Remove portals mounted in a specific element
+rmPortals(containerWithPortal, document.getElementById('modal-root'));
+
+// Remove portals mounted using a CSS selector
+rmPortals(containerWithPortal, '#modal-root');
+
+// Remove portals mounted in document.body (default behavior)
+rmPortals(containerWithPortal);
+// Equivalent to:
+rmPortals(containerWithPortal, document.body);
 ```
 
 #### Combining `show:when` with `for:each` and `portal:mount`
@@ -251,7 +275,10 @@ van.add(document.body, el);
 Returns:
 
 - `html`: The htm template tag.
-- `rmPortals(parentContainer: Node, portalTarget?: Element | string)`: Remove portaled elements created from `parentContainer` in `portalTarget` (or `document.body`). `portalTarget` can be an Element or a querySelector string. Refer to the examples [here](#portalmount).
+- `rmPortals(parentContainer: Node, portalTarget?: Element | string)`: Remove portaled elements created from `parentContainer`. The `portalTarget` parameter specifies where to look for the portal content:
+  - Can be an Element or a CSS selector string
+  - **Defaults to `document.body`** if not provided
+  - Refer to the examples [here](#portalmount).
 
 ## Technical Details
 
