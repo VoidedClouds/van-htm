@@ -1,13 +1,13 @@
 # VanHTM
 
-A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and [VanX](https://vanjs.org/x), supporting control flow directives and optional HTML entity decoding.
+A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and optionally [VanX](https://vanjs.org/x), supporting control flow directives and optional HTML entity decoding.
 
 [Here's a sample](https://codepen.io/VoidedClouds/pen/myygzNQ) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
 
 ## Features
 
 - **Tagged Template HTML**: Write JSX-like templates in plain JavaScript using [HTM](https://github.com/developit/htm) with [VanJS](https://vanjs.org), no build step required.
-- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering. You can also combine `show:when` with `for:each` and `portal:mount` to [conditionally render lists and portals](#combining-showwhen-with-foreach-and-portalmount).
+- **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering. You can also combine `show:when` with `for:each` and `portal:mount` to [conditionally render lists and portals](#combining-showwhen-with-foreach-and-portalmount). Note: [VanX](https://vanjs.org/x) is required only for the `for:each` directive.
 - **[Optional HTML Entity Decoding](#optional-html-entity-decoding)**: Decode HTML entities in string children (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
 - **TypeScript Support**: VanHTM is written in TypeScript and provides full type definitions.
 
@@ -27,7 +27,7 @@ A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](htt
 import htm from 'htm';
 import vanHTM from 'vanjs-htm';
 
-const { html, rmPortals } = vanHTM({ htm, van, vanX });
+const { html, rmPortals } = vanHTM({ htm, van, vanX: { list: vanX.list } });
 
 const el = html`
   <div>
@@ -63,6 +63,8 @@ Each directory contains:
 #### for:each
 
 Renders a list by looping over a reactive array or iterable. The value of `for:each` should be a reactive list (e.g., from `vanX.reactive`). The child function receives the current value, a deleter function, and the index/key.
+
+**Note:** This directive requires [VanX](https://vanjs.org/x). If `vanX` is not provided to `vanHTM()` and you attempt to use `for:each`, an error will occur.
 
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/raabqja)
 
@@ -125,7 +127,7 @@ Renders the element into a different part of the DOM (a "portal"). The `portal:m
 
 > **Note:** For `rmPortals` to work correctly, portals should only be the direct child of their parent element. Nesting portals deeper will prevent `rmPortals` from removing them properly.
 
-> **Implementation Detail:** VanHTM automatically adds a `p:id` attribute to portaled elements for internal tracking. This attribute is used by `rmPortals` to identify and remove the correct portal elements. You should not manually set or modify this attribute.
+> **Implementation Detail:** VanHTM automatically adds a `p:id` attribute to portaled elements for internal tracking. This attribute is used by `rmPortals` to identify and remove the correct portal elements. You should not manually set or modify this attribute. [See below](#portal-implementation) for more information.
 
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/GggLYdB)
 
@@ -224,7 +226,7 @@ van.add(document.getElementById('main-content'), container);
 import { decode } from 'html-entities';
 import vanHTM from 'vanjs-htm/withDecoding';
 
-const { html, rmPortals } = vanHTM({ htm, van, vanX, decode });
+const { html, rmPortals } = vanHTM({ htm, van, vanX: { list: vanX.list }, decode });
 
 // Example below
 const el = html`
@@ -243,13 +245,30 @@ van.add(document.body, el);
 
 - `htm`: Required in all builds. The HTM instance.
 - `van`: Required in all builds. The VanJS instance.
-- `vanX`: Required in all builds. The VanJS Extension instance.
+- `vanX`: Required only for the `for:each` directive. The VanJS Extension instance or an object that contains a `list` property set as `vanX.list`. If not provided and `for:each` is used, an error will occur.
 - `decode`: Required in builds that include HTML Entity Decoding (`vanjs-htm/withDecoding`). The decode method from a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.
 
 Returns:
 
 - `html`: The htm template tag.
 - `rmPortals(parentContainer: Node, portalTarget?: Element | string)`: Remove portaled elements created from `parentContainer` in `portalTarget` (or `document.body`). `portalTarget` can be an Element or a querySelector string. Refer to the examples [here](#portalmount).
+
+## Technical Details
+
+### Error Handling
+
+- **Invalid for:each Data**: The `for:each` directive relies on VanX's `list` function. Refer to [VanX documentation](https://vanjs.org/x#reactive-list) for error handling behavior with invalid reactive data.
+- **Invalid Portal Selectors**: If a CSS selector provided to `portal:mount` doesn't match any element, VanJS will throw an error when attempting to mount the portal content.
+- **Missing Portal Targets**: If `rmPortals` is called with an invalid selector or non-existent element, the function will silently return without performing any operations.
+- **Missing VanX for for:each**: If `vanX` is not provided to `vanHTM()` and the `for:each` directive is used, an error will occur.
+
+### HTM Caching Behavior
+
+VanHTM explicitly disables HTM's template string caching mechanism by setting `this[0] = 3` in the template processor. This ensures that each template evaluation creates fresh elements, which is necessary for proper VanJS reactivity and state management. Refer to [HTM documentation on Caching](https://github.com/developit/htm#caching) for more information.
+
+### Portal Implementation
+
+VanHTM automatically adds a `p:id` attribute to portaled elements for internal tracking. This attribute uses an auto-incrementing counter (format: `p-${counter}`) and is used by `rmPortals` to identify and remove the correct portal elements. You should not manually set or modify this attribute.
 
 ## License
 

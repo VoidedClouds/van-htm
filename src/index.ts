@@ -15,10 +15,10 @@ export type VanHTMOptions = {
    */
   van: Pick<Van, 'add' | 'tags'>;
   /**
-   * An object containing VanJS extensions.
+   * Optional, an object containing VanJS extensions.
    * `list` from `vanjs-ext` is required for the `for:each` directive.
    */
-  vanX: {
+  vanX?: {
     list: typeof list;
   };
   /**
@@ -165,7 +165,7 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   let portalIdCounter: number = 0;
   const handleFor = <T extends object>(tag: TagFunc<Element>, props: PropsCombined, itemFunc: ListItemFunction<T>): ChildDom => {
       const items = extractProperty<T>(props, directives.f.e);
-      const listFn = () => vanX.list(tag(props), items, itemFunc);
+      const listFn = () => vanX!.list(tag(props), items, itemFunc);
 
       return hasShowWhenProperty(props) ? handleShow(listFn, props as PropsCombined, _undefined, false) : listFn();
     },
