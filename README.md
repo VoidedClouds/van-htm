@@ -27,6 +27,7 @@ A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](htt
 import htm from 'htm';
 import vanHTM from 'vanjs-htm';
 
+// const { html, rmPortals } = vanHTM({ htm, van, vanX }); // This line and the one below are interchangeable
 const { html, rmPortals } = vanHTM({ htm, van, vanX: { list: vanX.list } });
 
 const el = html`
@@ -248,6 +249,7 @@ van.add(document.getElementById('main-content'), container);
 import { decode } from 'html-entities';
 import vanHTM from 'vanjs-htm/withDecoding';
 
+// const { html, rmPortals } = vanHTM({ htm, van, vanX, decode }); // This line and the one below are interchangeable
 const { html, rmPortals } = vanHTM({ htm, van, vanX: { list: vanX.list }, decode });
 
 // Example below
