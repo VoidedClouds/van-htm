@@ -240,7 +240,7 @@ const container = html`
 van.add(document.getElementById('main-content'), container);
 ```
 
-### Optional HTML Entity Decoding
+## Optional HTML Entity Decoding
 
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/bNNyqjo)
 
