@@ -41,12 +41,12 @@ van.add(document.body, el);
 
 ## Browser Builds
 
-VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs. If you choose a build that drops a feature you can exclude the corresponding library from the vanHTM options:
+VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs.
 
 **Build output structure:**
 
 - `dist/` default builds.
-- `dist/withDecoding/` builds that utilize HTML Entity Decoding (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
+- `dist/withDecoding/` builds that utilize [HTML Entity Decoding](#optional-html-entity-decoding) (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
 
 Each directory contains:
 
@@ -56,11 +56,9 @@ Each directory contains:
 - `van-htm.dev.module.js` (ESM, unminified)
 - `van-htm.dev.js` (IIFE/global, unminified)
 
-## Additional Usage Information
+## Control Flow Directives
 
-### Control Flow Directives
-
-#### for:each
+### for:each
 
 Renders a list by looping over a reactive array or iterable. The value of `for:each` should be a reactive list (e.g., from `vanX.reactive`). The child function receives the current value, a deleter function, and the index/key.
 
@@ -85,7 +83,7 @@ van.add(
 
 See [VanX docs: Reactive List](https://vanjs.org/x#reactive-list) for more details on the `itemFunc` parameter.
 
-#### show:when
+### show:when
 
 Conditionally renders content based on a boolean, a VanJS state, or a function. If the condition is falsy, the `show:fallback` value is rendered instead (can be a primitive, a state or a function if you need reactivity).
 
@@ -118,7 +116,7 @@ van.add(
 - `show:when`: Accepts a boolean, a VanJS state, or a function returning a boolean.
 - `show:fallback`: (Optional) Content to render when the condition is falsy. Can be a primitive, a state or a function if you need reactivity.
 
-#### portal:mount
+### portal:mount
 
 Renders the element into a different part of the DOM (a "portal"). The `portal:mount` attribute determines where the content is rendered. It can be:
 
@@ -161,7 +159,7 @@ const containerWithPortal = html`
 van.add(document.body, containerWithPortal);
 ```
 
-#### Removing Portaled Elements
+### Removing Portaled Elements
 
 ```js
 // Removes all portaled elements created from `parentContainer` that are mounted in `portalTarget`.
@@ -192,7 +190,7 @@ rmPortals(containerWithPortal);
 rmPortals(containerWithPortal, document.body);
 ```
 
-#### Combining `show:when` with `for:each` and `portal:mount`
+### Combining `show:when` with `for:each` and `portal:mount`
 
 You can combine the `show:when` directive with `for:each` and `portal:mount` on the same element to conditionally render lists or portaled elements. If the `show:when` condition is falsy, neither the list nor the portal will be rendered, and the `show:fallback` (if provided) will be used instead.
 
