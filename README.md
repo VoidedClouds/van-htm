@@ -21,8 +21,8 @@ A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](htt
 // <script src="https://cdn.jsdelivr.net/npm/vanjs-ext/dist/van-x.nomodule.min.js"></script>
 
 // Script tags for including htm and vanHTM
-// <script src=="https://cdn.jsdelivr.net/npm/htm/dist/htm.js"></script>
-// <script src=="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/htm/dist/htm.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/vanjs-htm/dist/van-htm.js"></script>
 // The imports below can be replaced by the script tags above for htm and vanHTM
 import htm from 'htm';
 import vanHTM from 'vanjs-htm';
