@@ -277,8 +277,10 @@ const basicSVG = html`
     <circle cx="50" cy="50" r=${radius} fill="lightblue" stroke="darkblue" stroke-width="2" />
     <text x="50" y="55" text-anchor="middle" fill="darkblue">SVG</text>
   </svg>
+  <br />
   <input type="range" min="10" max="45" value=${radius} oninput=${(e) => (radius.val = parseInt(e.target.value))} />
   <span>Radius: ${radius}</span>
+  <br />
 `;
 van.add(document.body, basicSVG);
 
@@ -346,23 +348,6 @@ Some elements exist in both HTML and SVG (`a`, `script`, `style`, `title`). Thes
 [Try on CodePen](https://codepen.io/VoidedClouds/pen/KwpzzKr)
 
 ```js
-// HTML link - defaults to HTML namespace
-const htmlLink = html`
-  <a href="/page" style="color: blue;">HTML Link</a>
-`;
-van.add(document.body, htmlLink);
-
-// SVG with clickable area - requires vh:svg for <a> element
-const svgWithLink = html`
-  <svg width="200" height="100">
-    <a vh:svg href="#home">
-      <rect x="10" y="10" width="180" height="80" fill="green" />
-      <text x="100" y="55" text-anchor="middle" fill="white">Click Me</text>
-    </a>
-  </svg>
-`;
-van.add(document.body, svgWithLink);
-
 // Using both HTML and SVG styles
 const styledSVG = html`
   <div>
