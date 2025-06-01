@@ -7,10 +7,10 @@ This directory contains an interactive demo of VanHTM features.
 From the project root:
 
 ```bash
-npm run dev
+npm run sandbox
 ```
 
-This will start a Vite dev server and open the sandbox in your browser.
+This will start a Vite server and open the sandbox in your browser.
 
 ## Structure
 
