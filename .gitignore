@@ -44,3 +44,8 @@ Thumbs.db
 
 # Temporary files
 sandbox/
+tmp/
+
+# Vite
+.vite/
+sandbox/.vite/

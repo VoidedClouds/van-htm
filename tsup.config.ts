@@ -41,7 +41,6 @@ function options({ dev, htmlEntityDecoding = false, node }: BundleOptions): Opti
   return {
     bundle: true,
     clean: true,
-    // dts: true,
     entry: {
       [node ? 'van-htm' : dev ? 'van-htm.dev' : 'van-htm']: 'src/index.ts'
     },

@@ -1,6 +1,6 @@
 # VanHTM
 
-A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and optionally [VanX](https://vanjs.org/x), supporting control flow directives and optional HTML entity decoding.
+A flexible and lightweight ([<900B gzipped minified](#browser-builds)) [HTM](https://github.com/developit/htm) integration for [VanJS](https://vanjs.org) and optionally [VanX](https://vanjs.org/x), supporting control flow directives, automatic SVG namespace handling, and optional HTML entity decoding.
 
 [Here's a sample](https://codepen.io/VoidedClouds/pen/myygzNQ) based on the [simplified TODO App](https://vanjs.org/x#a-simplified-todo-app) from [VanJS](https://vanjs.org).
 
@@ -8,6 +8,7 @@ A flexible and lightweight ([<700B gzipped minified](#browser-builds)) [HTM](htt
 
 - **Tagged Template HTML**: Write JSX-like templates in plain JavaScript using [HTM](https://github.com/developit/htm) with [VanJS](https://vanjs.org), no build step required.
 - **[Control Flow Directives](#control-flow-directives)**: Use [`for:each`](#foreach), [`show:when`](#showwhen), and [`portal:mount`](#portalmount) for [SolidJS](https://www.solidjs.com) style declarative rendering. You can also combine `show:when` with `for:each` and `portal:mount` to [conditionally render lists and portals](#combining-showwhen-with-foreach-and-portalmount). Note: [VanX](https://vanjs.org/x) is required only for the `for:each` directive.
+- **[Automatic SVG Support](#svg-support)**: SVG elements are automatically rendered with the correct namespace. Use the [`vh:svg`](#vhsvg-directive) directive for excluded or ambiguous elements.
 - **[Optional HTML Entity Decoding](#optional-html-entity-decoding)**: Decode HTML entities in string children (requires a HTML entities library like [entities](https://github.com/fb55/entities), [he](https://github.com/mathiasbynens/he), [html-entities](https://github.com/mdevils/html-entities), etc.).
 - **TypeScript Support**: VanHTM is written in TypeScript and provides full type definitions.
 
@@ -40,6 +41,17 @@ const el = html`
 van.add(document.body, el);
 ```
 
+## Local Sandbox
+
+The repository includes a sandbox environment for experimenting with VanHTM locally. To run it:
+
+```bash
+npm install
+npm run sandbox
+```
+
+This will start a local development server where you can explore and test VanHTM features.
+
 ## Browser Builds
 
 VanHTM provides several prebuilt bundles for browser usage, available via CDN (e.g., [jsDelivr](https://www.jsdelivr.com/package/npm/vanjs-htm)). You can choose the build that best fits your needs.
@@ -51,8 +63,8 @@ VanHTM provides several prebuilt bundles for browser usage, available via CDN (e
 
 Each directory contains:
 
-- `van-htm.module.js` (ESM, minified, 684B gzipped)
-- `van-htm.js` (IIFE/global, minified, 690B gzipped)
+- `van-htm.module.js` (ESM, minified, ~870B gzipped)
+- `van-htm.js` (IIFE/global, minified, ~880B gzipped)
 - `van-htm.cjs` (CJS, minified)
 - `van-htm.dev.module.js` (ESM, unminified)
 - `van-htm.dev.js` (IIFE/global, unminified)
@@ -239,6 +251,138 @@ const container = html`
   </div>
 `;
 van.add(document.getElementById('main-content'), container);
+```
+
+## SVG Support
+
+VanHTM automatically handles SVG elements by applying the correct namespace when rendering. This ensures that SVG elements work properly without any additional configuration.
+
+### Automatically Handled SVG Elements
+
+The following SVG elements are automatically rendered with the SVG namespace:
+
+**Shapes**: `circle`, `ellipse`, `line`, `path`, `polygon`, `polyline`, `rect`
+**Container elements**: `svg`, `g`, `defs`, `symbol`, `use`
+**Gradient and pattern elements**: `linearGradient`, `radialGradient`, `stop`, `pattern`
+**Text elements**: `text`, `textPath`, `tspan`
+**Other common elements**: `clipPath`, `desc`, `filter`, `foreignObject`, `marker`, `mask`
+
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/emNZJwo)
+
+```js
+// Basic SVG with automatic namespace handling
+const radius = van.state(30);
+const basicSVG = html`
+  <svg width="100" height="100">
+    <circle cx="50" cy="50" r=${radius} fill="lightblue" stroke="darkblue" stroke-width="2" />
+    <text x="50" y="55" text-anchor="middle" fill="darkblue">SVG</text>
+  </svg>
+  <input type="range" min="10" max="45" value=${radius} oninput=${(e) => (radius.val = parseInt(e.target.value))} />
+  <span>Radius: ${radius}</span>
+`;
+van.add(document.body, basicSVG);
+
+// Complex SVG with gradients and paths
+const complexSVG = html`
+  <svg width="200" height="100">
+    <defs>
+      <linearGradient id="gradient">
+        <stop offset="0%" stop-color="#f00" />
+        <stop offset="100%" stop-color="#00f" />
+      </linearGradient>
+    </defs>
+    <rect x="10" y="10" width="180" height="80" fill="url(#gradient)" rx="10" />
+    <path d="M 50 50 L 150 50" stroke="white" stroke-width="3" />
+  </svg>
+`;
+van.add(document.body, complexSVG);
+```
+
+### Excluded Elements
+
+To keep the bundle size small, some SVG elements are excluded from automatic namespace handling:
+
+- **Animation elements**: `animate`, `animateMotion`, `animateTransform`, `set`
+- **Filter effect elements**: All `fe*` elements (e.g., `feGaussianBlur`, `feBlend`, `feColorMatrix`, etc.)
+- **Other elements**: `metadata`, `mpath`, `switch`, `view`
+
+### vh:svg Directive
+
+For excluded elements or when you need explicit control, use the `vh:svg` directive to force SVG namespace:
+
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/VYLaawm)
+
+```js
+// Animated SVG using vh:svg directive for excluded elements
+const animatedCircle = html`
+  <svg width="200" height="200">
+    <circle cx="100" cy="100" r="40" fill="purple">
+      <!-- animate is excluded, so we need vh:svg -->
+      <animate vh:svg attributeName="r" values="40;60;40" dur="2s" repeatCount="indefinite" />
+    </circle>
+  </svg>
+`;
+van.add(document.body, animatedCircle);
+
+// SVG with filter effects using vh:svg
+const blurredRect = html`
+  <svg width="200" height="200">
+    <defs>
+      <filter id="blur">
+        <!-- feGaussianBlur is excluded, so we need vh:svg -->
+        <feGaussianBlur vh:svg in="SourceGraphic" stdDeviation="5" />
+      </filter>
+    </defs>
+    <rect x="50" y="50" width="100" height="100" fill="orange" filter="url(#blur)" />
+  </svg>
+`;
+van.add(document.body, blurredRect);
+```
+
+### Shared HTML/SVG Elements
+
+Some elements exist in both HTML and SVG (`a`, `script`, `style`, `title`). These default to HTML namespace for compatibility:
+
+[Try on CodePen](https://codepen.io/VoidedClouds/pen/KwpzzKr)
+
+```js
+// HTML link - defaults to HTML namespace
+const htmlLink = html`
+  <a href="/page" style="color: blue;">HTML Link</a>
+`;
+van.add(document.body, htmlLink);
+
+// SVG with clickable area - requires vh:svg for <a> element
+const svgWithLink = html`
+  <svg width="200" height="100">
+    <a vh:svg href="#home">
+      <rect x="10" y="10" width="180" height="80" fill="green" />
+      <text x="100" y="55" text-anchor="middle" fill="white">Click Me</text>
+    </a>
+  </svg>
+`;
+van.add(document.body, svgWithLink);
+
+// Using both HTML and SVG styles
+const styledSVG = html`
+  <div>
+    <style>
+      .highlight {
+        fill: yellow;
+      }
+    </style>
+    <svg width="100" height="100">
+      <style vh:svg>
+        .svgtext {
+          font-size: 20px;
+        }
+      </style>
+      <circle cx="50" cy="50" r="40" class="highlight" />
+      <text x="50" y="55" text-anchor="middle" class="svgtext">Hi</text>
+    </svg>
+  </div>
+`;
+van.add(document.body, styledSVG);
 ```
 
 ## Optional HTML Entity Decoding

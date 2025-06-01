@@ -129,7 +129,8 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
   const directives = {
     f: { e: 'for:each' as const },
     p: { m: 'portal:mount' as const },
-    s: { f: 'show:fallback' as const, w: 'show:when' as const }
+    s: { f: 'show:fallback' as const, w: 'show:when' as const },
+    svg: 'vh:svg' as const
   } as const;
 
   const extractProperty = <T>(object: PropsCombined, key: string): T => {
@@ -186,6 +187,19 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
       return _document.createComment(portalId);
     };
 
+  // SVG element types that require namespace
+  // Excludes overlapping HTML tags: a, image, script, style, title
+  // These elements exist in both HTML and SVG but should use HTML namespace by default
+  // Also excludes rarely used elements: animate*, fe* (filter effects), metadata, mpath, set, switch, view
+  // For full SVG support, use vh:svg directive on specific elements
+  // prettier-ignore
+  const svgElements = new Set([
+    'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'filter', 'foreignObject',
+    'g', 'line', 'linearGradient', 'marker', 'mask', 'path', 'pattern', 
+    'polygon', 'polyline', 'radialGradient', 'rect', 'stop', 'svg', 'symbol',
+    'text', 'textPath', 'tspan', 'use'
+  ]);
+
   function h<T extends object>(
     this: [number, ...unknown[]],
     type: string,
@@ -195,7 +209,12 @@ const vanHTM = (options: VanHTMOptions): VanHTM => {
     // Disable caching of created elements https://github.com/developit/htm/#caching
     this[0] = 3;
 
-    const tag = van.tags[type];
+    // Check for vh:svg directive first, then fall back to svgElements set
+    // Check if this is an SVG element and use the appropriate namespace
+    const tag = (props && objectHasOwn(props, directives.svg) ? !!extractProperty<boolean>(props, directives.svg) : svgElements.has(type))
+      ? van.tags('http://www.w3.org/2000/svg')[type]
+      : van.tags[type];
+
     const decodedChildren = __HTML_ENTITY_DECODING__
       ? children?.map((child) => (isTypeOfString(child) ? decode!(child) : child))
       : children;
