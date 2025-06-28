@@ -2,12 +2,13 @@
   "name": "vanjs-htm",
   "author": "VoidedClouds",
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "HTM with VanJS for JSX-like syntax in vanilla JavaScript using VanJS reactivity.",
   "files": [
     "dist",
     "types"
   ],
+  "jsdelivr": "./dist/van-htm.js",
   "types": "./types/van-htm.d.ts",
   "main": "./dist/van-htm.js",
   "module": "./dist/van-htm.module.js",
@@ -16,6 +17,10 @@
       "types": "./types/van-htm.d.ts",
       "import": "./dist/van-htm.module.js",
       "require": "./dist/van-htm.cjs"
+    },
+    "./dev": {
+      "types": "./types/van-htm.d.ts",
+      "import": "./dist/van-htm.dev.module.js"
     },
     "./withDecoding": {
       "types": "./types/van-htm.d.ts",
